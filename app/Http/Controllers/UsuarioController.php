@@ -13,13 +13,28 @@ class UsuarioController extends Controller
     }
 
     public function store(Request $request) {
-        User::create([
-            'name' => $request->nombre,
-            'email' => $request->correo,
-            'password' => bcrypt('123456') // Password por defecto
-        ]);
-        return back(); // Recarga la página para ver el nuevo nombre
-    }
+    // 1. Reglas de validación
+    $request->validate([
+        'nombre' => 'required|min:3|max:50',
+        'correo' => 'required|email|unique:users,email',
+    ], [
+        // Mensajes personalizados en español
+        'nombre.required' => 'Oye, el nombre es obligatorio.',
+        'nombre.min' => 'El nombre debe tener al menos 3 letras.',
+        'correo.required' => 'Necesitamos un email para contactarte.',
+        'correo.email' => 'Ese formato de correo no es válido.',
+        'correo.unique' => 'Ese correo ya está registrado en la base de datos.',
+    ]);
+
+    // 2. Si pasa la validación, se guarda
+    User::create([
+        'name' => $request->nombre,
+        'email' => $request->correo,
+        'password' => bcrypt('123456')
+    ]);
+
+    return back()->with('success', '¡Usuario guardado con éxito!');
+}
 
     public function destroy($id) {
         User::destroy($id); // Borra al usuario por su ID

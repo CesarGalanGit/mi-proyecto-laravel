@@ -9,10 +9,28 @@
         
         <div class="bg-white p-6 rounded-xl shadow-md h-fit">
             <h1 class="text-xl font-bold mb-4 text-gray-700">Nuevo Usuario</h1>
+
+            @if ($errors->any())
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-sm" role="alert">
+                    <p class="font-bold">¡Uy! Revisa los datos:</p>
+                    <ul class="mt-2 list-disc list-inside text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm">
+                    <p>{{ session('success') }}</p>
+                </div>
+            @endif
+
             <form action="/usuarios" method="POST" class="space-y-3">
                 @csrf
-                <input type="text" name="nombre" placeholder="Nombre completo" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
-                <input type="email" name="correo" placeholder="Email" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+                <input type="text" name="nombre" value="{{ old('nombre') }}" placeholder="Nombre completo" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+                <input type="email" name="correo" value="{{ old('correo') }}" placeholder="Email" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
                 <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">Guardar en DB</button>
             </form>
         </div>
@@ -29,13 +47,13 @@
                         <input type="email" name="correo" value="{{ $user->email }}" class="text-sm text-gray-600 bg-transparent border-b focus:border-blue-500 outline-none">
                         
                         <div class="flex gap-2 mt-2">
-                            <button type="submit" class="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Actualizar</button>
+                            <button type="submit" class="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 shadow-sm">Actualizar</button>
                     </form>
 
                     <form action="/usuarios/{{ $user->id }}" method="POST">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Borrar</button>
+                        <button type="submit" class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 shadow-sm">Borrar</button>
                     </form>
                         </div>
                 </div>

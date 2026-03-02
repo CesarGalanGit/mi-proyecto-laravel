@@ -7,8 +7,16 @@ use App\Models\User;
 
 class UsuarioController extends Controller
 {
-    public function index() {
-        $usuarios = User::all(); // Trae todos los de phpMyAdmin
+    public function index(Request $request) {
+        // 1. Obtenemos lo que el usuario escribe en el buscador
+        $buscar = $request->get('buscar');
+
+        // 2. Buscamos por nombre o correo, y paginamos de 5 en 5
+        $usuarios = User::where('name', 'LIKE', "%$buscar%")
+                        ->orWhere('email', 'LIKE', "%$buscar%")
+                        ->paginate(5)
+                        ->withQueryString(); // Mantiene la búsqueda al cambiar de página
+
         return view('usuarios', compact('usuarios'));
     }
 

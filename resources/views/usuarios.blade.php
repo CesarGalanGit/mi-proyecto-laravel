@@ -37,27 +37,37 @@
 
         <div class="bg-white p-6 rounded-xl shadow-md">
             <h2 class="text-xl font-bold mb-4 text-gray-700">Usuarios en phpMyAdmin</h2>
+
+            <form action="/usuarios" method="GET" class="mb-4 flex gap-2">
+                <input type="text" name="buscar" value="{{ request('buscar') }}" placeholder="Buscar por nombre o email..." class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400">
+                <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-900">Buscar</button>
+            </form>
+
             <div class="space-y-4">
                 @foreach($usuarios as $user)
-                <div class="p-4 border rounded-lg bg-gray-50">
-                    <form action="/usuarios/{{ $user->id }}" method="POST" class="flex flex-col gap-2">
-                        @csrf
-                        @method('PUT')
-                        <input type="text" name="nombre" value="{{ $user->name }}" class="font-semibold bg-transparent border-b focus:border-blue-500 outline-none">
-                        <input type="email" name="correo" value="{{ $user->email }}" class="text-sm text-gray-600 bg-transparent border-b focus:border-blue-500 outline-none">
-                        
-                        <div class="flex gap-2 mt-2">
-                            <button type="submit" class="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 shadow-sm">Actualizar</button>
-                    </form>
+                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <form action="/usuarios/{{ $user->id }}" method="POST" class="flex flex-col gap-2">
+                            @csrf
+                            @method('PUT')
+                            <input type="text" name="nombre" value="{{ $user->name }}" class="font-semibold bg-transparent border-b focus:border-blue-500 outline-none">
+                            <input type="email" name="correo" value="{{ $user->email }}" class="text-sm text-gray-600 bg-transparent border-b focus:border-blue-500 outline-none">
+                            
+                            <div class="flex gap-2 mt-2">
+                                <button type="submit" class="text-xs bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 shadow-sm">Actualizar</button>
+                        </form>
 
-                    <form action="/usuarios/{{ $user->id }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 shadow-sm">Borrar</button>
-                    </form>
-                        </div>
-                </div>
+                        <form action="/usuarios/{{ $user->id }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 shadow-sm">Borrar</button>
+                        </form>
+                            </div>
+                    </div>
                 @endforeach
+            </div>
+
+            <div class="mt-6">
+                {{ $usuarios->links() }}
             </div>
         </div>
     </div>

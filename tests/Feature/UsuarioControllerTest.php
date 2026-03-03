@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class UsuarioControllerTest extends TestCase
@@ -59,7 +60,7 @@ class UsuarioControllerTest extends TestCase
             'password_confirmation' => 'mismatch',
         ]);
 
-        $response->assertSessionHasErrors(['nombre', 'correo', 'password']);
+        $response->assertSessionHasErrorsIn('createUsuario', ['nombre', 'correo', 'password']);
     }
 
     public function test_store_rechaza_email_duplicado(): void
@@ -73,7 +74,7 @@ class UsuarioControllerTest extends TestCase
             'password_confirmation' => 'password-123',
         ]);
 
-        $response->assertSessionHasErrors('correo');
+        $response->assertSessionHasErrorsIn('createUsuario', 'correo');
     }
 
     public function test_update_modifica_usuario(): void
@@ -106,7 +107,29 @@ class UsuarioControllerTest extends TestCase
             'correo' => 'invalid',
         ]);
 
-        $response->assertSessionHasErrors(['nombre', 'correo']);
+        $response->assertSessionHasErrorsIn('updateUsuario', ['nombre', 'correo']);
+    }
+
+    public function test_update_permite_cambiar_password_con_mismo_correo(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'usuario@test.com',
+            'password' => 'password-inicial',
+        ]);
+
+        $response = $this->authenticateAsAdmin()->put("/usuarios/{$user->id}", [
+            'nombre' => $user->name,
+            'correo' => 'usuario@test.com',
+            'password' => 'nuevo-password-123',
+            'password_confirmation' => 'nuevo-password-123',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $user->refresh();
+
+        $this->assertTrue(Hash::check('nuevo-password-123', $user->password));
     }
 
     public function test_destroy_elimina_usuario(): void

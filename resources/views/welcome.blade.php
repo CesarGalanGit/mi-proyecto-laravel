@@ -9,7 +9,7 @@
     {{-- Header de bienvenida --}}
     <div class="animate-fade-in">
         <h1 class="text-3xl font-bold text-slate-900 dark:text-white">
-            Bienvenido a <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Laravel Studio</span>
+            Bienvenido a <span class="bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent">Laravel Studio</span>
         </h1>
         <p class="mt-2 text-slate-500 dark:text-slate-400">
             Tu proyecto de estudio PHP/Laravel. Aquí tienes un resumen de tu base de datos.
@@ -73,14 +73,14 @@
                     <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Registrados Hoy</p>
                     <p class="mt-2 text-4xl font-extrabold text-slate-900 dark:text-white">{{ $usuariosHoy ?? 0 }}</p>
                 </div>
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
                     <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-2">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300">
                     {{ now()->format('d M Y') }}
                 </span>
             </div>
@@ -91,6 +91,34 @@
     <div class="animate-slide-up delay-4">
         <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Acciones Rápidas</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <a href="{{ route('shop.index') }}"
+               class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-cyan-300 dark:hover:border-cyan-700 transition-all duration-300">
+                <div class="w-11 h-11 rounded-xl bg-cyan-100 dark:bg-cyan-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                    </svg>
+                </div>
+                    <div>
+                        <p class="font-semibold text-slate-800 dark:text-white">Tienda de coches</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Catálogo con anuncios oficiales externos</p>
+                    </div>
+                </a>
+
+            @can('manage-users')
+                <a href="{{ route('admin.shop.cars.index') }}"
+                   class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-sky-300 dark:hover:border-sky-700 transition-all duration-300">
+                    <div class="w-11 h-11 rounded-xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-800 dark:text-white">Admin tienda</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Gestionar coches y pedidos</p>
+                    </div>
+                </a>
+            @endcan
 
             <a href="{{ route('usuarios.index') }}"
                class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300">
@@ -144,7 +172,7 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="font-semibold text-slate-800 dark:text-white">Iniciar sesion</p>
+                            <p class="font-semibold text-slate-800 dark:text-white">Iniciar sesión</p>
                             <p class="text-sm text-slate-500 dark:text-slate-400">Para exportar necesitas acceso</p>
                         </div>
                     </a>

@@ -2,13 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateUsuarioRequest extends FormRequest
 {
+    protected $errorBag = 'updateUsuario';
+
     protected function prepareForValidation(): void
     {
+        $this->merge([
+            'nombre' => trim((string) $this->input('nombre', '')),
+            'correo' => trim((string) $this->input('correo', '')),
+        ]);
+
         if ($this->input('password') === '') {
             $this->merge([
                 'password' => null,
@@ -46,6 +54,7 @@ class UpdateUsuarioRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->route('user');
+        $userId = $user instanceof User ? $user->getKey() : (is_numeric($user) ? (int) $user : null);
 
         return [
             'nombre' => ['required', 'string', 'min:3', 'max:50'],
@@ -53,7 +62,7 @@ class UpdateUsuarioRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($user),
+                Rule::unique('users', 'email')->ignore($userId),
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];

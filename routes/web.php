@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\CarAdminController;
+use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,9 +24,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });
 
+Route::prefix('tienda')->name('shop.')->group(function () {
+    Route::get('/', [ShopController::class, 'index'])->name('index');
+    Route::get('/coches/{car:slug}', [ShopController::class, 'show'])->name('show');
+    Route::get('/coches/{car:slug}/ir', [ShopController::class, 'outbound'])->name('outbound');
+});
+
 Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 
 Route::middleware(['auth', 'can:manage-users'])->group(function () {
+    Route::prefix('admin/tienda')->name('admin.shop.')->group(function () {
+        Route::get('/coches', [CarAdminController::class, 'index'])->name('cars.index');
+        Route::post('/coches', [CarAdminController::class, 'store'])->name('cars.store');
+        Route::put('/coches/{car:id}', [CarAdminController::class, 'update'])->name('cars.update');
+        Route::delete('/coches/{car:id}', [CarAdminController::class, 'destroy'])->name('cars.destroy');
+
+        Route::get('/pedidos', [OrderAdminController::class, 'index'])->name('orders.index');
+        Route::patch('/pedidos/{order:id}', [OrderAdminController::class, 'update'])->name('orders.update');
+    });
+
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 
     /*

@@ -6,6 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUsuarioRequest extends FormRequest
 {
+    protected $errorBag = 'createUsuario';
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'nombre' => trim((string) $this->input('nombre', '')),
+            'correo' => trim((string) $this->input('correo', '')),
+        ]);
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */

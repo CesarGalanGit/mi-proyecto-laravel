@@ -4,6 +4,18 @@
 @section('page-title', 'Gestión de Usuarios')
 
 @section('content')
+@php
+    $createErrors = $errors->getBag('createUsuario');
+    $updateErrors = $errors->getBag('updateUsuario');
+    $defaultErrors = $errors->getBag('default');
+
+    $allValidationErrors = array_merge(
+        $createErrors->all(),
+        $updateErrors->all(),
+        $defaultErrors->all()
+    );
+@endphp
+
 <div class="max-w-6xl mx-auto space-y-6">
 
     {{-- ============================================
@@ -31,6 +43,14 @@
 
         {{-- Action Buttons --}}
         <div class="flex items-center gap-3">
+            <a href="{{ route('shop.index') }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                </svg>
+                Tienda
+            </a>
+
             @can('manage-users')
                 <a href="{{ route('usuarios.export') }}"
                    class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
@@ -60,7 +80,7 @@
 
                 @guest
                     <span class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-                        Inicia sesion desde la barra superior para gestionar.
+                        Inicia sesión desde la barra superior para gestionar.
                     </span>
                 @endguest
             @endcan
@@ -70,7 +90,7 @@
     {{-- ============================================
          VALIDATION ERRORS (from store/update)
          ============================================ --}}
-    @if ($errors->any())
+    @if (count($allValidationErrors) > 0)
         <div class="animate-fade-in bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4">
             <div class="flex items-start gap-3">
                 <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +99,7 @@
                 <div>
                     <p class="font-semibold text-red-700 dark:text-red-400 text-sm">¡Revisa los siguientes datos:</p>
                     <ul class="mt-1 text-sm text-red-600 dark:text-red-400/80 list-disc list-inside space-y-0.5">
-                        @foreach ($errors->all() as $error)
+                        @foreach ($allValidationErrors as $error)
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
@@ -202,6 +222,7 @@
                                     <form action="{{ route('usuarios.update', $user) }}" method="POST" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                                         @csrf
                                         @method('PUT')
+                                        <input type="hidden" name="editing_user_id" value="{{ $user->id }}">
                                         <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                                             <input type="text" name="nombre" value="{{ $user->name }}"
                                                    class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
@@ -261,12 +282,12 @@
                         @endauth
 
                         @guest
-                            <a href="{{ route('login') }}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25">
+                            <a href="{{ route('login') }}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-lg hover:from-sky-500 hover:to-cyan-500 transition-all shadow-md shadow-cyan-500/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l5-5m0 0l-5-5m5 5H3" />
                                 </svg>
-                                Iniciar sesion
+                                Iniciar sesión
                             </a>
                         @endguest
                     @endcan
@@ -291,7 +312,7 @@
      CREATE USER MODAL
      ============================================ --}}
 @can('manage-users')
-<div id="createModal" class="modal-backdrop" data-auto-open="{{ $errors->any() && old('nombre') !== null ? '1' : '0' }}" onclick="if(event.target === this) closeModal()">
+<div id="createModal" class="modal-backdrop" data-auto-open="{{ $createErrors->any() ? '1' : '0' }}" onclick="if(event.target === this) closeModal()">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="modal-panel w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800">
 
@@ -405,6 +426,12 @@
     // Auto-open modal if there are old input errors for the create form
     document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('createModal');
+        const editingUserId = "{{ old('editing_user_id') }}";
+
+        if (editingUserId) {
+            toggleEdit(editingUserId);
+        }
+
         if (modal && modal.dataset.autoOpen === '1') {
             openModal();
         }

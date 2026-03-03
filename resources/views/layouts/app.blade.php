@@ -7,12 +7,11 @@
     <meta name="description" content="Proyecto de estudio PHP/Laravel - CRUD de Usuarios">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'PHP Prueba') — Laravel Studio</title>
+    <title>@yield('title', 'Laravel Studio') — Laravel Studio</title>
 
-    {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -26,12 +25,12 @@
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 z-40 w-64 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
         <div
-            class="flex flex-col h-full bg-gradient-to-b from-indigo-950 via-indigo-900 to-violet-950 text-white shadow-xl">
+            class="flex flex-col h-full bg-gradient-to-b from-slate-900 via-sky-950 to-cyan-950 text-white shadow-xl">
 
             {{-- Logo Area --}}
             <div class="flex items-center gap-3 px-6 py-6 border-b border-white/10">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-400 flex items-center justify-center shadow-lg">
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-400 flex items-center justify-center shadow-lg">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
@@ -39,18 +38,18 @@
                 </div>
                 <div>
                     <h1 class="text-lg font-bold tracking-tight">Laravel Studio</h1>
-                    <p class="text-xs text-indigo-300/70">PHP Learning Project</p>
+                    <p class="text-xs text-sky-200/70">Panel profesional</p>
                 </div>
             </div>
 
             {{-- Navigation --}}
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                <p class="px-3 mb-3 text-[10px] font-semibold uppercase tracking-widest text-indigo-400/60">Principal
+                <p class="px-3 mb-3 text-[10px] font-semibold uppercase tracking-widest text-sky-300/60">Principal
                 </p>
 
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                          {{ request()->is('/') ? 'bg-white/15 text-white shadow-sm' : 'text-indigo-200/80 hover:bg-white/10 hover:text-white' }}">
+                          {{ request()->is('/') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -60,7 +59,7 @@
 
                 <a href="{{ route('usuarios.index') }}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                          {{ request()->is('usuarios*') ? 'bg-white/15 text-white shadow-sm' : 'text-indigo-200/80 hover:bg-white/10 hover:text-white' }}">
+                          {{ request()->is('usuarios*') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -68,17 +67,48 @@
                     Usuarios
                     @if(isset($totalUsuarios))
                         <span
-                            class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-400/20 text-indigo-300 border border-indigo-400/30">
+                            class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold rounded-full bg-sky-400/20 text-sky-200 border border-sky-400/30">
                             {{ $totalUsuarios }}
                         </span>
                     @endif
                 </a>
+
+                <a href="{{ route('shop.index') }}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                          {{ request()->is('tienda*') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                    </svg>
+                    Tienda
+                </a>
+
+                @can('manage-users')
+                    <p class="px-3 mt-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-sky-300/60">Admin tienda</p>
+
+                    <a href="{{ route('admin.shop.cars.index') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                              {{ request()->is('admin/tienda/coches*') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                        </svg>
+                        Gestión coches
+                    </a>
+
+                    <a href="{{ route('admin.shop.orders.index') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                              {{ request()->is('admin/tienda/pedidos*') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Gestión pedidos
+                    </a>
+                @endcan
             </nav>
 
             {{-- Dark Mode Toggle --}}
             <div class="px-4 py-4 border-t border-white/10">
                 <button id="darkModeToggle" onclick="toggleDarkMode()"
-                    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-indigo-200/80 hover:bg-white/10 hover:text-white transition-all duration-200">
+                    class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-sky-100/80 hover:bg-white/10 hover:text-white transition-all duration-200">
                     {{-- Sun icon (visible in dark mode) --}}
                     <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -128,9 +158,16 @@
                         Laravel v{{ Illuminate\Foundation\Application::VERSION }}
                     </span>
 
+                    <a href="{{ route('shop.index') }}" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6m-6 0a2 2 0 11-4 0m4 0a2 2 0 104 0m6 0a2 2 0 11-4 0m4 0H9m0 0V5a1 1 0 011-1h6a1 1 0 011 1v12m-8 0h8" />
+                        </svg>
+                        Tienda
+                    </a>
+
                     @auth
                         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60">
-                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white text-[11px] font-bold">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 text-white text-[11px] font-bold">
                                 {{ mb_substr(auth()->user()->email, 0, 1) }}
                             </span>
                             <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 max-w-[220px] truncate">
@@ -144,18 +181,18 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                                 </svg>
-                                Cerrar sesion
+                                Cerrar sesión
                             </button>
                         </form>
                     @endauth
 
                     @guest
-                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25">
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 transition-all shadow-md shadow-cyan-500/20">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l5-5m0 0l-5-5m5 5H3" />
                             </svg>
-                            Iniciar sesion
+                            Iniciar sesión
                         </a>
                     @endguest
                 </div>
@@ -170,7 +207,7 @@
         {{-- Footer --}}
         <footer class="px-4 sm:px-6 lg:px-8 py-4 border-t border-slate-200/60 dark:border-slate-800/60">
             <p class="text-xs text-center text-slate-400 dark:text-slate-600">
-                PHP Prueba &copy; {{ date('Y') }} — Proyecto de estudio con Laravel
+                Laravel Studio &copy; {{ date('Y') }} — Gestión de usuarios con Laravel
                 {{ Illuminate\Foundation\Application::VERSION }}
             </p>
         </footer>

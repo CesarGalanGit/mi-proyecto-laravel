@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-
-use Illuminate\Pagination\Paginator; // Añade esta línea arriba
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,7 +21,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useTailwind(); // Asegura que use Tailwind
+        // Compartir el total de usuarios con el layout para el badge del sidebar
+        View::composer('layouts.app', function ($view) {
+            try {
+                $view->with('totalUsuarios', User::count());
+            } catch (\Throwable) {
+                // Si la BD no está disponible (ej: migraciones pendientes), no romper
+                $view->with('totalUsuarios', 0);
+            }
+        });
     }
 }
-

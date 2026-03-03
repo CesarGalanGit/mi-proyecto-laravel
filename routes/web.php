@@ -1,38 +1,38 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UsuarioController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | Dashboard (Welcome)
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    try {
-        $controller = new UsuarioController();
-        $stats = $controller->stats();
-    } catch (\Throwable) {
-        // Si la BD no está disponible, mostrar valores por defecto
-        $stats = ['totalUsuarios' => 0, 'ultimoUsuario' => null, 'usuariosHoy' => 0];
-    }
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    return view('welcome', $stats);
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Exportar Usuarios a CSV (debe ir ANTES de la ruta con {id})
-|--------------------------------------------------------------------------
-*/
-Route::get('/usuarios/exportar', [UsuarioController::class, 'export']);
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+});
 
-/*
-|--------------------------------------------------------------------------
-| CRUD de Usuarios
-|--------------------------------------------------------------------------
-*/
-Route::get('/usuarios', [UsuarioController::class, 'index']);
-Route::post('/usuarios', [UsuarioController::class, 'store']);
-Route::delete('/usuarios/{id}', [UsuarioController::class, 'destroy']);
-Route::put('/usuarios/{id}', [UsuarioController::class, 'update']);
+Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+
+Route::middleware(['auth', 'can:manage-users'])->group(function () {
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exportar Usuarios a CSV (debe ir ANTES de la ruta con {user})
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/usuarios/exportar', [UsuarioController::class, 'export'])->name('usuarios.export');
+
+    Route::put('/usuarios/{user}', [UsuarioController::class, 'update'])->name('usuarios.update');
+    Route::delete('/usuarios/{user}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+});

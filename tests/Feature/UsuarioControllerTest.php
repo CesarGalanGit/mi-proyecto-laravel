@@ -10,6 +10,18 @@ class UsuarioControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function authenticateAsAdmin(): self
+    {
+        $email = (string) config('admin.email', 'test@example.com');
+
+        /** @var User $admin */
+        $admin = User::factory()->create([
+            'email' => $email,
+        ]);
+
+        return $this->actingAs($admin);
+    }
+
     public function test_index_muestra_lista_de_usuarios(): void
     {
         User::factory(3)->create();
@@ -23,9 +35,11 @@ class UsuarioControllerTest extends TestCase
 
     public function test_store_crea_usuario_valido(): void
     {
-        $response = $this->post('/usuarios', [
+        $response = $this->authenticateAsAdmin()->post('/usuarios', [
             'nombre' => 'María García',
             'correo' => 'maria@test.com',
+            'password' => 'password-123',
+            'password_confirmation' => 'password-123',
         ]);
 
         $response->assertRedirect();
@@ -38,21 +52,25 @@ class UsuarioControllerTest extends TestCase
 
     public function test_store_rechaza_datos_invalidos(): void
     {
-        $response = $this->post('/usuarios', [
+        $response = $this->authenticateAsAdmin()->post('/usuarios', [
             'nombre' => '',
             'correo' => 'no-es-email',
+            'password' => 'short',
+            'password_confirmation' => 'mismatch',
         ]);
 
-        $response->assertSessionHasErrors(['nombre', 'correo']);
+        $response->assertSessionHasErrors(['nombre', 'correo', 'password']);
     }
 
     public function test_store_rechaza_email_duplicado(): void
     {
         User::factory()->create(['email' => 'duplicado@test.com']);
 
-        $response = $this->post('/usuarios', [
+        $response = $this->authenticateAsAdmin()->post('/usuarios', [
             'nombre' => 'Otro Usuario',
             'correo' => 'duplicado@test.com',
+            'password' => 'password-123',
+            'password_confirmation' => 'password-123',
         ]);
 
         $response->assertSessionHasErrors('correo');
@@ -65,7 +83,7 @@ class UsuarioControllerTest extends TestCase
             'email' => 'viejo@test.com',
         ]);
 
-        $response = $this->put("/usuarios/{$user->id}", [
+        $response = $this->authenticateAsAdmin()->put("/usuarios/{$user->id}", [
             'nombre' => 'Nombre Nuevo',
             'correo' => 'nuevo@test.com',
         ]);
@@ -83,7 +101,7 @@ class UsuarioControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->put("/usuarios/{$user->id}", [
+        $response = $this->authenticateAsAdmin()->put("/usuarios/{$user->id}", [
             'nombre' => 'AB',  // min:3
             'correo' => 'invalid',
         ]);
@@ -95,7 +113,7 @@ class UsuarioControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->delete("/usuarios/{$user->id}");
+        $response = $this->authenticateAsAdmin()->delete("/usuarios/{$user->id}");
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -129,10 +147,46 @@ class UsuarioControllerTest extends TestCase
     {
         User::factory(3)->create();
 
-        $response = $this->get('/usuarios/exportar');
+        $response = $this->authenticateAsAdmin()->get('/usuarios/exportar');
 
         $response->assertStatus(200);
         $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+    }
+
+    public function test_buscar_filtra_por_email(): void
+    {
+        User::factory()->create(['email' => 'carlos@test.com']);
+        User::factory()->create(['email' => 'ana@test.com']);
+
+        $response = $this->get('/usuarios?buscar=carlos@test.com');
+
+        $response->assertStatus(200);
+        $response->assertSee('carlos@test.com');
+        $response->assertDontSee('ana@test.com');
+    }
+
+    public function test_per_page_invalido_vuelve_a_default(): void
+    {
+        User::factory(10)->create();
+
+        $response = $this->get('/usuarios?per_page=999');
+
+        $response->assertStatus(200);
+        $response->assertViewHas('usuarios', function ($usuarios) {
+            return $usuarios->perPage() === 5;
+        });
+    }
+
+    public function test_export_incluye_cabecera_csv(): void
+    {
+        User::factory(1)->create();
+
+        $response = $this->authenticateAsAdmin()->get('/usuarios/exportar');
+
+        $response->assertStatus(200);
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('ID,Nombre,Email,', $content);
+        $this->assertStringContainsString('Fecha de Registro', $content);
     }
 
     public function test_dashboard_muestra_estadisticas(): void

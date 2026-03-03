@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use App\Models\User;
+use PDOException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,11 +25,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::define('manage-users', function (User $user): bool {
+            return $user->email === config('admin.email');
+        });
+
         // Compartir el total de usuarios con el layout para el badge del sidebar
         View::composer('layouts.app', function ($view) {
             try {
-                $view->with('totalUsuarios', User::count());
-            } catch (\Throwable) {
+                $totalUsuarios = Cache::remember('users.count', now()->addSeconds(30), function (): int {
+                    return User::count();
+                });
+
+                $view->with('totalUsuarios', $totalUsuarios);
+            } catch (QueryException|PDOException) {
                 // Si la BD no está disponible (ej: migraciones pendientes), no romper
                 $view->with('totalUsuarios', 0);
             }

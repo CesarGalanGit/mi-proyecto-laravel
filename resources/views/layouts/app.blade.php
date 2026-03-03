@@ -48,7 +48,7 @@
                 <p class="px-3 mb-3 text-[10px] font-semibold uppercase tracking-widest text-indigo-400/60">Principal
                 </p>
 
-                <a href="/"
+                <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                           {{ request()->is('/') ? 'bg-white/15 text-white shadow-sm' : 'text-indigo-200/80 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
                     Dashboard
                 </a>
 
-                <a href="/usuarios"
+                <a href="{{ route('usuarios.index') }}"
                     class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                           {{ request()->is('usuarios*') ? 'bg-white/15 text-white shadow-sm' : 'text-indigo-200/80 hover:bg-white/10 hover:text-white' }}">
                     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,6 +127,37 @@
                     <span class="text-xs text-slate-400 dark:text-slate-500 hidden sm:block">
                         Laravel v{{ Illuminate\Foundation\Application::VERSION }}
                     </span>
+
+                    @auth
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60">
+                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white text-[11px] font-bold">
+                                {{ mb_substr(auth()->user()->email, 0, 1) }}
+                            </span>
+                            <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 max-w-[220px] truncate">
+                                {{ auth()->user()->email }}
+                            </span>
+                        </div>
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                                </svg>
+                                Cerrar sesion
+                            </button>
+                        </form>
+                    @endauth
+
+                    @guest
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l5-5m0 0l-5-5m5 5H3" />
+                            </svg>
+                            Iniciar sesion
+                        </a>
+                    @endguest
                 </div>
             </div>
         </header>
@@ -149,6 +180,14 @@
     TOAST CONTAINER
     ============================================ --}}
     <div id="toastContainer" class="toast-container"></div>
+
+    <div
+        id="flashMessages"
+        class="hidden"
+        data-success='@json(session('success'))'
+        data-error='@json(session('error'))'
+        data-info='@json(session('info'))'
+    ></div>
 
     {{-- ============================================
     GLOBAL SCRIPTS
@@ -214,17 +253,24 @@
 
         // Show flash messages as toasts
         document.addEventListener('DOMContentLoaded', function () {
-            @if(session('success'))
-                showToast(@json(session('success')), 'success');
-            @endif
+            const flashEl = document.getElementById('flashMessages');
+            const flashes = flashEl ? {
+                success: JSON.parse(flashEl.dataset.success || 'null'),
+                error: JSON.parse(flashEl.dataset.error || 'null'),
+                info: JSON.parse(flashEl.dataset.info || 'null'),
+            } : { success: null, error: null, info: null };
 
-            @if(session('error'))
-                showToast(@json(session('error')), 'error');
-            @endif
+            if (flashes.success) {
+                showToast(flashes.success, 'success');
+            }
 
-            @if(session('info'))
-                showToast(@json(session('info')), 'info');
-            @endif
+            if (flashes.error) {
+                showToast(flashes.error, 'error');
+            }
+
+            if (flashes.info) {
+                showToast(flashes.info, 'info');
+            }
         });
     </script>
 

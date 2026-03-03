@@ -12,7 +12,7 @@
     <div class="animate-fade-in flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
         {{-- Search --}}
-        <form action="/usuarios" method="GET" class="flex-1 max-w-md">
+        <form action="{{ route('usuarios.index') }}" method="GET" class="flex-1 max-w-md">
             <div class="relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -31,21 +31,39 @@
 
         {{-- Action Buttons --}}
         <div class="flex items-center gap-3">
-            <a href="/usuarios/exportar"
-               class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                CSV
-            </a>
+            @can('manage-users')
+                <a href="{{ route('usuarios.export') }}"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    CSV
+                </a>
 
-            <button onclick="openModal()"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Nuevo Usuario
-            </button>
+                <button onclick="openModal()"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-xl hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Usuario
+                </button>
+            @else
+                @auth
+                    <span class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V7a4 4 0 10-8 0v4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 11h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+                        </svg>
+                        Sin permisos
+                    </span>
+                @endauth
+
+                @guest
+                    <span class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-400">
+                        Inicia sesion desde la barra superior para gestionar.
+                    </span>
+                @endguest
+            @endcan
         </div>
     </div>
 
@@ -82,7 +100,7 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400">{{ $usuarios->total() }} usuario(s) encontrado(s)</p>
             </div>
             {{-- Items per page selector --}}
-            <form action="/usuarios" method="GET" class="flex items-center gap-2">
+            <form action="{{ route('usuarios.index') }}" method="GET" class="flex items-center gap-2">
                 @if(request('buscar'))
                     <input type="hidden" name="buscar" value="{{ request('buscar') }}">
                 @endif
@@ -141,62 +159,80 @@
                             {{-- Actions --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-2">
-                                    {{-- Edit button --}}
-                                    <button onclick="toggleEdit({{ $user->id }})"
-                                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/50 transition"
-                                            title="Editar">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-
-                                    {{-- Delete button --}}
-                                    <form action="/usuarios/{{ $user->id }}" method="POST"
-                                          onsubmit="return confirm('¿Seguro que quieres eliminar a {{ addslashes($user->name) }}? Esta acción no se puede deshacer.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/50 transition"
-                                                title="Eliminar">
+                                    @can('manage-users')
+                                        {{-- Edit button --}}
+                                        <button data-user-id="{{ $user->id }}" onclick="toggleEdit(this.dataset.userId)"
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-indigo-950/50 transition"
+                                                title="Editar">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
-                                    </form>
+
+                                        {{-- Delete button --}}
+                                        <form action="{{ route('usuarios.destroy', $user) }}" method="POST"
+                                              onsubmit="return confirm('¿Seguro que quieres eliminar a {{ addslashes($user->name) }}? Esta acción no se puede deshacer.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/50 transition"
+                                                    title="Eliminar">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V7a4 4 0 10-8 0v4" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 11h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+                                            </svg>
+                                            Bloqueado
+                                        </a>
+                                    @endcan
                                 </div>
                             </td>
                         </tr>
 
-                        {{-- Inline Edit Row (hidden by default) --}}
-                        <tr id="edit-row-{{ $user->id }}" class="hidden bg-indigo-50/50 dark:bg-indigo-950/20">
-                            <td colspan="4" class="px-6 py-4">
-                                <form action="/usuarios/{{ $user->id }}" method="POST" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="flex-1 flex flex-col sm:flex-row gap-3 w-full">
-                                        <input type="text" name="nombre" value="{{ $user->name }}"
-                                               class="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
-                                               placeholder="Nombre completo" required>
-                                        <input type="email" name="correo" value="{{ $user->email }}"
-                                               class="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
-                                               placeholder="Email" required>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button type="submit"
-                                                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 transition shadow-sm">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            Guardar
-                                        </button>
-                                        <button type="button" onclick="toggleEdit({{ $user->id }})"
-                                                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
+                        @can('manage-users')
+                            {{-- Inline Edit Row (hidden by default) --}}
+                            <tr id="edit-row-{{ $user->id }}" class="hidden bg-indigo-50/50 dark:bg-indigo-950/20">
+                                <td colspan="4" class="px-6 py-4">
+                                    <form action="{{ route('usuarios.update', $user) }}" method="POST" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                                            <input type="text" name="nombre" value="{{ $user->name }}"
+                                                   class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
+                                                   placeholder="Nombre completo" required>
+                                            <input type="email" name="correo" value="{{ $user->email }}"
+                                                   class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
+                                                   placeholder="Email" required>
+                                            <input type="password" name="password"
+                                                   class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
+                                                   placeholder="Nueva contraseña (opcional)">
+                                            <input type="password" name="password_confirmation"
+                                                   class="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400"
+                                                   placeholder="Confirmar contraseña">
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-500 transition shadow-sm">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Guardar
+                                            </button>
+                                            <button type="button" data-user-id="{{ $user->id }}" onclick="toggleEdit(this.dataset.userId)"
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endcan
                     @empty
                         <tr>
                             <td colspan="4" class="px-6 py-16 text-center">
@@ -208,10 +244,32 @@
                                     </div>
                                     <p class="font-semibold text-slate-500 dark:text-slate-400">No hay usuarios</p>
                                     <p class="text-sm text-slate-400 dark:text-slate-500 mt-1">Empieza creando el primero</p>
-                                    <button onclick="openModal()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-950 transition">
+                    @can('manage-users')
+                        <button onclick="openModal()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-950 transition">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                         Crear usuario
                                     </button>
+                    @else
+                        @auth
+                            <span class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V7a4 4 0 10-8 0v4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 11h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+                                </svg>
+                                Sin permisos
+                            </span>
+                        @endauth
+
+                        @guest
+                            <a href="{{ route('login') }}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg hover:from-indigo-500 hover:to-violet-500 transition-all shadow-md shadow-indigo-500/25">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l5-5m0 0l-5-5m5 5H3" />
+                                </svg>
+                                Iniciar sesion
+                            </a>
+                        @endguest
+                    @endcan
                                 </div>
                             </td>
                         </tr>
@@ -232,7 +290,8 @@
 {{-- ============================================
      CREATE USER MODAL
      ============================================ --}}
-<div id="createModal" class="modal-backdrop" onclick="if(event.target === this) closeModal()">
+@can('manage-users')
+<div id="createModal" class="modal-backdrop" data-auto-open="{{ $errors->any() && old('nombre') !== null ? '1' : '0' }}" onclick="if(event.target === this) closeModal()">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="modal-panel w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800">
 
@@ -251,7 +310,7 @@
             </div>
 
             {{-- Modal Body --}}
-            <form action="/usuarios" method="POST" class="p-6 space-y-5">
+            <form action="{{ route('usuarios.store') }}" method="POST" class="p-6 space-y-5">
                 @csrf
 
                 <div>
@@ -272,6 +331,24 @@
                            placeholder="ana@ejemplo.com" required>
                 </div>
 
+                <div>
+                    <label for="modal-password" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        Contraseña
+                    </label>
+                    <input type="password" id="modal-password" name="password"
+                           class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition"
+                           placeholder="Mínimo 8 caracteres" required>
+                </div>
+
+                <div>
+                    <label for="modal-password-confirmation" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                        Confirmar contraseña
+                    </label>
+                    <input type="password" id="modal-password-confirmation" name="password_confirmation"
+                           class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 transition"
+                           placeholder="Repite la contraseña" required>
+                </div>
+
                 {{-- Modal Footer --}}
                 <div class="flex items-center justify-end gap-3 pt-2">
                     <button type="button" onclick="closeModal()"
@@ -287,6 +364,7 @@
         </div>
     </div>
 </div>
+@endcan
 @endsection
 
 @section('scripts')
@@ -325,8 +403,11 @@
     }
 
     // Auto-open modal if there are old input errors for the create form
-    @if($errors->any() && old('nombre') !== null)
-        document.addEventListener('DOMContentLoaded', () => openModal());
-    @endif
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('createModal');
+        if (modal && modal.dataset.autoOpen === '1') {
+            openModal();
+        }
+    });
 </script>
 @endsection

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreUsuarioRequest;
+use App\Http\Requests\UpdateUsuarioRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UsuarioController extends Controller
@@ -11,19 +15,25 @@ class UsuarioController extends Controller
     /**
      * Lista paginada de usuarios con búsqueda y cantidad dinámica por página.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $buscar = $request->get('buscar');
-        $porPagina = $request->get('per_page', 5);
+        $buscar = trim((string) $request->query('buscar', ''));
+        $porPagina = (int) $request->query('per_page', 5);
 
         // Limitar las opciones válidas de paginación
-        $porPagina = in_array((int) $porPagina, [5, 10, 25]) ? (int) $porPagina : 5;
+        $porPagina = in_array($porPagina, [5, 10, 25], true) ? $porPagina : 5;
 
-        $usuarios = User::where('name', 'LIKE', "%$buscar%")
-                        ->orWhere('email', 'LIKE', "%$buscar%")
-                        ->orderBy('created_at', 'desc')
-                        ->paginate($porPagina)
-                        ->withQueryString();
+        $usuarios = User::query()
+            ->when($buscar !== '', function ($query) use ($buscar) {
+                $query->where(function ($query) use ($buscar) {
+                    $query
+                        ->where('name', 'LIKE', "%{$buscar}%")
+                        ->orWhere('email', 'LIKE', "%{$buscar}%");
+                });
+            })
+            ->orderByDesc('created_at')
+            ->paginate($porPagina)
+            ->withQueryString();
 
         $totalUsuarios = User::count();
 
@@ -33,23 +43,14 @@ class UsuarioController extends Controller
     /**
      * Crea un nuevo usuario con validación completa.
      */
-    public function store(Request $request)
+    public function store(StoreUsuarioRequest $request): RedirectResponse
     {
-        $request->validate([
-            'nombre' => 'required|min:3|max:50',
-            'correo' => 'required|email|unique:users,email',
-        ], [
-            'nombre.required' => 'Oye, el nombre es obligatorio.',
-            'nombre.min' => 'El nombre debe tener al menos 3 letras.',
-            'correo.required' => 'Necesitamos un email para contactarte.',
-            'correo.email' => 'Ese formato de correo no es válido.',
-            'correo.unique' => 'Ese correo ya está registrado en la base de datos.',
-        ]);
+        $validated = $request->validated();
 
         User::create([
-            'name' => $request->nombre,
-            'email' => $request->correo,
-            'password' => bcrypt('123456')
+            'name' => $validated['nombre'],
+            'email' => $validated['correo'],
+            'password' => $validated['password'],
         ]);
 
         return back()->with('success', '¡Usuario creado con éxito!');
@@ -58,9 +59,8 @@ class UsuarioController extends Controller
     /**
      * Elimina un usuario por su ID.
      */
-    public function destroy($id)
+    public function destroy(User $user): RedirectResponse
     {
-        $user = User::findOrFail($id);
         $nombreUsuario = $user->name;
         $user->delete();
 
@@ -70,25 +70,20 @@ class UsuarioController extends Controller
     /**
      * Actualiza un usuario con validación.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateUsuarioRequest $request, User $user): RedirectResponse
     {
-        $user = User::findOrFail($id);
+        $validated = $request->validated();
 
-        $request->validate([
-            'nombre' => 'required|min:3|max:50',
-            'correo' => 'required|email|unique:users,email,' . $user->id,
-        ], [
-            'nombre.required' => 'El nombre es obligatorio.',
-            'nombre.min' => 'El nombre debe tener al menos 3 letras.',
-            'correo.required' => 'Necesitamos un email.',
-            'correo.email' => 'Formato de correo no válido.',
-            'correo.unique' => 'Ese correo ya pertenece a otro usuario.',
-        ]);
+        $data = [
+            'name' => $validated['nombre'],
+            'email' => $validated['correo'],
+        ];
 
-        $user->update([
-            'name' => $request->nombre,
-            'email' => $request->correo,
-        ]);
+        if (! empty($validated['password'] ?? null)) {
+            $data['password'] = $validated['password'];
+        }
+
+        $user->update($data);
 
         return back()->with('success', "Usuario \"$user->name\" actualizado correctamente.");
     }
@@ -98,7 +93,7 @@ class UsuarioController extends Controller
      */
     public function export(): StreamedResponse
     {
-        $filename = 'usuarios_' . date('Y-m-d_H-i') . '.csv';
+        $filename = 'usuarios_'.date('Y-m-d_H-i').'.csv';
 
         return response()->streamDownload(function () {
             $handle = fopen('php://output', 'w');
@@ -123,17 +118,5 @@ class UsuarioController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
-    }
-
-    /**
-     * Devuelve estadísticas para el dashboard.
-     */
-    public function stats(): array
-    {
-        $totalUsuarios = User::count();
-        $ultimoUsuario = User::latest()->first();
-        $usuariosHoy = User::whereDate('created_at', today())->count();
-
-        return compact('totalUsuarios', 'ultimoUsuario', 'usuariosHoy');
     }
 }

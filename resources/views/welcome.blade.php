@@ -33,7 +33,7 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-2">
-                <a href="/usuarios" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Ver todos →</a>
+                <a href="{{ route('usuarios.index') }}" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">Ver todos →</a>
             </div>
         </div>
 
@@ -92,7 +92,7 @@
         <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Acciones Rápidas</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <a href="/usuarios"
+            <a href="{{ route('usuarios.index') }}"
                class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300">
                 <div class="w-11 h-11 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,18 +105,51 @@
                 </div>
             </a>
 
-            <a href="/usuarios/exportar"
-               class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300">
-                <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-semibold text-slate-800 dark:text-white">Exportar CSV</p>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Descargar todos los datos</p>
-                </div>
-            </a>
+            @can('manage-users')
+                <a href="{{ route('usuarios.export') }}"
+                   class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-800 dark:text-white">Exportar CSV</p>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Descargar todos los datos</p>
+                    </div>
+                </a>
+            @else
+                @auth
+                    <div class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11V7a4 4 0 10-8 0v4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 11h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 dark:text-white">Sin permisos</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Necesitas el usuario admin para exportar</p>
+                        </div>
+                    </div>
+                @endauth
+
+                @guest
+                    <a href="{{ route('login') }}"
+                       class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 17l5-5m0 0l-5-5m5 5H3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 dark:text-white">Iniciar sesion</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Para exportar necesitas acceso</p>
+                        </div>
+                    </a>
+                @endguest
+            @endcan
 
             <a href="https://laravel.com/docs" target="_blank"
                class="group flex items-center gap-4 p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/70 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700 transition-all duration-300">

@@ -30,8 +30,8 @@ services:
       SESSION_DRIVER: array
       
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-    volumes:
-      - ./:/app
+    # En desarrollo, la imagen ya incluye todo (vendor, node_modules)
+    # Para cambios en código, reconstruir la imagen
     depends_on:
       mysql:
         condition: service_healthy

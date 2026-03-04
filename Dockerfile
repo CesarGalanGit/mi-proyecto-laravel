@@ -45,9 +45,11 @@ COPY --from=builder /app/storage ./storage
 COPY --from=builder /app/bootstrap ./bootstrap
 COPY --from=builder /app/config ./config
 COPY --from=builder /app/routes ./routes
+COPY --from=builder /app/app ./app
 COPY --from=builder /app/.env ./.env
 COPY --from=builder /app/artisan ./
 COPY --from=builder /app/bootstrap/app ./bootstrap/app
+COPY --from=builder /app/database ./database
 
 EXPOSE 80 443
 

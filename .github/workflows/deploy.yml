@@ -9,34 +9,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
-    
+    needs: [build-and-push] # Wait for docker image to be ready
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # - name: Setup SSH
-      #   uses: webfactory/ssh-agent@v0.8.0
-      #   with:
-      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          php-version: '8.5'
-
-      - name: Install dependencies
-        run: composer install --no-interaction --optimize-autoloader
-
-      - name: Build assets
-        run: |
-          npm ci
-          npm run build
-
-      - name: Run migrations
-        run: php artisan migrate --force
-
-      - name: Deploy to server
-        run: |
-          echo "Deploy commands go here"
-          # Add your deployment commands here
-          # Example: rsync, scp, or custom deployment script
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/app
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker exec app php artisan migrate --force
+            docker exec app php artisan optimize

@@ -1,31 +1,48 @@
-FROM php:8.2-cli
+# Stage 1: Build assets with Node.js
+FROM node:20-alpine AS node-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
 
-RUN apt-get update && apt-get install -y \
-    libzip-dev \
+# Stage 2: Production PHP environment
+FROM dunglas/frankenphp:1.3-php8.3-alpine
+
+# Install PHP extensions
+RUN install-php-extensions \
+    pcntl \
+    pdo_mysql \
+    gd \
+    intl \
     zip \
-    unzip \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    curl \
-    git \
-    && docker-php-ext-configure gd \
-    && docker-php-ext-install pdo pdo_mysql zip gd
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    opcache
 
 WORKDIR /app
 
+# Copy application files
 COPY . .
+COPY --from=node-builder /app/public/build ./public/build
 
-RUN cp .env.example .env || true
-
+# Install Composer dependencies
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-RUN php artisan key:generate --force || true
-RUN php artisan config:cache --no-interaction || true
-RUN php artisan route:cache --no-interaction || true
+# Optimize Laravel
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
-EXPOSE 8080
+# Set permissions
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+# Production environment variables
+ENV RUN_MIGRATIONS=false
+ENV FRANKENPHP_CONFIG="import /etc/caddy/Caddyfile.d/*.caddy"
+
+# The base image already exposes 80 and 443
+EXPOSE 80
+EXPOSE 443
+
+# Start FrankenPHP
+CMD ["frankenphp", "php-server"]

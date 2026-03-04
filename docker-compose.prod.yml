@@ -1,31 +1,44 @@
 services:
-    app:
-        build: .
-        ports:
-            - "8080:8080"
-        environment:
-            - APP_ENV=production
-            - DB_HOST=mysql
-            - DB_PORT=3306
-            - DB_DATABASE=prueba-php
-            - DB_USERNAME=sail
-            - DB_PASSWORD=password
-        depends_on:
-            - mysql
-        volumes:
-            - ./storage:/app/storage
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mi-proyecto-laravel:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-prueba_php}
+      - DB_USERNAME=${DB_USERNAME:-sail}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./storage:/app/storage
 
-    mysql:
-        image: mysql:8.4
-        ports:
-            - "3306:3306"
-        environment:
-            MYSQL_ROOT_PASSWORD: rootpassword
-            MYSQL_DATABASE: prueba-php
-            MYSQL_USER: sail
-            MYSQL_PASSWORD: password
-        volumes:
-            - mysql_data:/var/lib/mysql
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_DATABASE:-prueba_php}
+      MYSQL_USER: ${DB_USERNAME:-sail}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD:-password}"]
+      retries: 3
+      timeout: 5s
 
 volumes:
-    mysql_data:
+  mysql_data:
+  caddy_data:
+  caddy_config:

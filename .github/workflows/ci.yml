@@ -7,25 +7,22 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  tests:
     runs-on: ubuntu-latest
-    environment: production
 
     services:
       mysql:
         image: mysql:8.4
         env:
-          MYSQL_ROOT_PASSWORD: rootpassword
-          MYSQL_DATABASE: prueba-php
-          MYSQL_USER: sail
-          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
         ports:
           - 3306:3306
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=3
 
     steps:
       - uses: actions/checkout@v4
@@ -33,38 +30,44 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, iconv, mysql, gd
+          coverage: none
 
-      - name: Install dependencies
-        run: composer install --no-interaction
+      - name: Install Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-      - name: Create .env
+      - name: Prepare Environment
         run: |
           cp .env.example .env
           php artisan key:generate
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
 
-      - name: Directory permissions
-        run: chmod -R 777 storage bootstrap/cache
+      - name: Run Tests
+        run: php artisan test --parallel
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: testing
+          DB_USERNAME: root
+          DB_PASSWORD: password
 
-      - name: Run migrations
-        run: php artisan migrate --force --no-interaction
-
-      - name: Run tests
-        run: php artisan test --without-tty || true
-
-  pint:
+  linting:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5'
-
-      - name: Install Pint
-        run: composer install --no-interaction
-
+          php-version: "8.3"
+      - name: Install dependencies
+        run: composer install --no-interaction --no-scripts
       - name: Run Pint
         run: ./vendor/bin/pint --test

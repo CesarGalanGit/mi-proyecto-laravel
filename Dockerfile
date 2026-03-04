@@ -2,7 +2,8 @@
 FROM node:20 AS node-builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+# Clean cache and install for clean slate
+RUN npm cache clean --force && npm install
 COPY . .
 RUN npm run build
 

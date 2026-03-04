@@ -24,6 +24,9 @@ storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
 
+# === Frontend builds (will be done in container) ===
+public/build
+
 # === Docker files (avoid recursive copy) ===
 Dockerfile
 compose.yaml
@@ -35,3 +38,4 @@ README.md
 # === Tests (not needed in production image) ===
 tests
 phpunit.xml
+

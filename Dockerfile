@@ -2,7 +2,7 @@
 FROM node:20 AS node-builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY vite.config.js ./
 COPY resources ./resources
 RUN npm run build
@@ -24,13 +24,17 @@ WORKDIR /app
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy ALL application files first (needed for post-install scripts like package:discover)
+# Install dependencies optimizing cache layer
+COPY composer.json composer.lock* ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Copy ALL application files
 COPY . .
 
 # Copy built assets from node stage
 COPY --from=node-builder /app/public/build ./public/build
 
-# Install dependencies (scripts like package:discover need the full app)
+# Finish installation (scripts like package:discover need the full app)
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
@@ -44,6 +48,11 @@ EXPOSE 443
 COPY <<'EOF' /usr/local/bin/start.sh
 #!/bin/sh
 set -e
+
+# Create .env if it doesn't exist, so key:generate doesn't fail
+if [ ! -f .env ]; then
+    cp .env.example .env
+fi
 
 # Generate key if not set
 if [ -z "$APP_KEY" ]; then

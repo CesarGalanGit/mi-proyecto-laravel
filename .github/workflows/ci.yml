@@ -40,14 +40,15 @@ jobs:
       - name: Prepare Environment
         run: |
           cp .env.example .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=testing/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env
+          sed -i 's/CACHE_STORE=.*/CACHE_STORE=array/' .env
+          sed -i 's/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' .env
+          sed -i 's/ADMIN_EMAIL=.*/ADMIN_EMAIL=test@example.com/' .env
           php artisan key:generate
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
 
       - name: Run Migrations
         run: php artisan migrate --force
@@ -60,14 +61,7 @@ jobs:
           DB_PASSWORD: password
 
       - name: Run Tests
-        run: php artisan test --display-warnings --display-errors
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
+        run: php artisan test
 
   linting:
     runs-on: ubuntu-latest

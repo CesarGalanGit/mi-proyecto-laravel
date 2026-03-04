@@ -1,21 +1,37 @@
+# === Docker Build Exclusions ===
 .git
 .github
 node_modules
 vendor
+
+# === Environment & Config ===
+.env
+.env.backup
+.env.production
+.env.testing
+
+# === IDE & Tooling ===
+.phpunit.result.cache
+.phpunit.cache
+.idea
+.vscode
+.fleet
+.zed
+
+# === Storage (ephemeral data) ===
 storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
-.env
-.env.testing
-.phpunit.result.cache
+
+# === Docker files (avoid recursive copy) ===
 Dockerfile
 compose.yaml
 docker-compose.prod.yml
+
+# === Documentation ===
 README.md
-vendor_old
+
+# === Tests (not needed in production image) ===
 tests
 phpunit.xml
-vite.config.js
-package.json
-package-lock.json

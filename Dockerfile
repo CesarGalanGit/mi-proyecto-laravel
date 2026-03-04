@@ -20,7 +20,8 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 
 COPY . .
 
-RUN php artisan key:generate --force && \
+RUN cp .env.example .env && \
+    php artisan key:generate --force && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache --force

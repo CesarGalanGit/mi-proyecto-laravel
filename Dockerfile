@@ -21,20 +21,17 @@ RUN install-php-extensions \
 
 WORKDIR /app
 
-# Copy composer files first for better layer caching
-COPY composer.json composer.lock ./
-
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copy application files
+# Copy ALL application files first (needed for post-install scripts like package:discover)
 COPY . .
 
 # Copy built assets from node stage
 COPY --from=node-builder /app/public/build ./public/build
+
+# Install dependencies (scripts like package:discover need the full app)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache

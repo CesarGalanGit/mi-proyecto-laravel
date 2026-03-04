@@ -17,14 +17,17 @@ WORKDIR /app
 
 COPY . .
 
-RUN cp .env.example .env && \
-    php artisan key:generate --force
-
 RUN composer install --no-dev --optimize-autoloader
 
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache --force
+RUN cp .env.example .env
+
+RUN php artisan key:generate --force || echo "Key generation skipped"
+
+RUN php artisan config:cache --no-interaction || echo "Config cache skipped"
+
+RUN php artisan route:cache --no-interaction || echo "Route cache skipped"
+
+RUN php artisan view:cache --no-interaction || echo "View cache skipped"
 
 EXPOSE 80 443
 

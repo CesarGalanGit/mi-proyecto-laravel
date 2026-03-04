@@ -2,9 +2,9 @@
 FROM node:20 AS node-builder
 WORKDIR /app
 COPY package*.json ./
-# Clean cache and install for clean slate
-RUN npm cache clean --force && npm install
-COPY . .
+RUN npm install
+COPY vite.config.js ./
+COPY resources ./resources
 RUN npm run build
 
 # Stage 2: Production PHP environment
@@ -21,29 +21,52 @@ RUN install-php-extensions \
 
 WORKDIR /app
 
+# Copy composer files first for better layer caching
+COPY composer.json composer.lock ./
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
 # Copy application files
 COPY . .
+
+# Copy built assets from node stage
 COPY --from=node-builder /app/public/build ./public/build
-
-# Install Composer dependencies
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Optimize Laravel
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
 
 # Set permissions
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-# Production environment variables
-ENV RUN_MIGRATIONS=false
-ENV FRANKENPHP_CONFIG="import /etc/caddy/Caddyfile.d/*.caddy"
-
-# The base image already exposes 80 and 443
+# Expose ports (FrankenPHP handles HTTP/HTTPS)
 EXPOSE 80
 EXPOSE 443
 
+# Entrypoint script to run optimizations at runtime (when .env is available)
+COPY <<'EOF' /usr/local/bin/start.sh
+#!/bin/sh
+set -e
+
+# Generate key if not set
+if [ -z "$APP_KEY" ]; then
+    php artisan key:generate --force
+fi
+
+# Run migrations if enabled
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    php artisan migrate --force
+fi
+
+# Cache config/routes/views at runtime (when env vars are available)
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
 # Start FrankenPHP
-CMD ["frankenphp", "php-server"]
+exec frankenphp php-server
+EOF
+
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]

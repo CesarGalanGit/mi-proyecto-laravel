@@ -1,41 +1,79 @@
-# === Docker Build Exclusions ===
+# === Version Control ===
 .git
 .github
+.gitlab-ci.yml
+.gitignore
+.gitattributes
+
+# === Dependencies ===
 node_modules
 vendor
 
-# === Environment & Config ===
+# === Environment Files ===
 .env
-.env.backup
-.env.production
-.env.testing
+.env.*
+!.env.example
 
-# === IDE & Tooling ===
-.phpunit.result.cache
-.phpunit.cache
+# === IDE & Editor ===
 .idea
 .vscode
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
 .fleet
 .zed
 
-# === Storage (ephemeral data) ===
+# === Testing & Coverage ===
+tests
+phpunit.xml
+phpunit.result.cache
+coverage
+.pulse
+
+# === Build Artifacts ===
+public/build
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# === Storage (runtime data) ===
+storage/*.key
+storage/app/public
 storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
+!storage/framework
+!storage/framework/cache
+!storage/framework/sessions
+!storage/framework/views
+!storage/logs/.gitignore
 
-# === Frontend builds (will be done in container) ===
-public/build
+# === Bootstrap Cache ===
+bootstrap/cache/*.php
+!bootstrap/cache/.gitignore
+!bootstrap/cache/packages.php
+!bootstrap/cache/services.php
 
-# === Docker files (avoid recursive copy) ===
+# === Cache Files ===
+.cache
+.envrc
+.direnv
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Docker ===
 Dockerfile
-compose.yaml
-docker-compose.prod.yml
+docker-compose*.yml
+.compose.yaml
+.dockerignore
 
-# === Documentation ===
+# === Misc ===
 README.md
-
-# === Tests (not needed in production image) ===
-tests
-phpunit.xml
+CHANGELOG.md
+LICENSE
+UPGRADE.md
 

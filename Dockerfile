@@ -20,11 +20,15 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 
 COPY . .
 
-RUN cp .env.example .env && \
-    php artisan key:generate --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache --force
+RUN cp .env.example .env
+
+RUN php artisan key:generate --force || true
+
+RUN php artisan config:cache || true
+
+RUN php artisan route:cache || true
+
+RUN php artisan view:cache --force || true
 
 FROM dunglas/frankenphp:alpine
 

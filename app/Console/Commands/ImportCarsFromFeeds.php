@@ -187,11 +187,11 @@ class ImportCarsFromFeeds extends Command
 
         try {
             // Solo subimos si es una URL externa válida
-            if (!str_starts_with($url, 'http')) {
+            if (! str_starts_with($url, 'http')) {
                 return $url;
             }
 
-            $uploadedFileUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($url, [
+            $uploadedFileUrl = Cloudinary::upload($url, [
                 'folder' => 'cars_aggregator',
             ])->getSecurePath();
 

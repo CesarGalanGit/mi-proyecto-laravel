@@ -77,5 +77,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - name: Build Docker Image (Dry Run)
-        run: docker build . --file Dockerfile --target php-base
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: production
+          push: false
+          cache-from: type=gha,scope=${{ github.repository }}
+          cache-to: type=gha,scope=${{ github.repository }},mode=max

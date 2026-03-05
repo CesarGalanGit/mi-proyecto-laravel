@@ -14,7 +14,7 @@ RUN apk add --no-cache \
     bash \
     mysql-client
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache
 
 # Instalar extensión de Redis
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
@@ -42,29 +42,41 @@ RUN npm run build
 # Stage 4: Production Image
 FROM php-base AS production
 
+# Usar configuración de producción de PHP
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+# Configurar OPcache
+COPY docker/php/opcache.ini "$PHP_INI_DIR/conf.d/opcache.ini"
+
+# Crear usuario no privilegiado para la aplicación
+RUN addgroup -S laravel && adduser -S laravel -G laravel
+
 # Copiar Composer binario
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar dependencias de Composer
+# Copiar dependencias de Composer a un temporal para dump-autoload posterior
 COPY --from=composer-build /app/vendor /var/www/vendor
 
 # Copiar assets compilados
 COPY --from=node-build /app/public/build /var/www/public/build
 
-# Copiar el resto de la aplicación
-COPY . /var/www
+# Copiar el resto de la aplicación con los permisos correctos
+COPY --chown=laravel:laravel . /var/www
 
 # Generar el autoloader de Composer optimizado
 RUN composer dump-autoload --optimize --no-dev
 
-# Ajustar permisos
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Ajustar permisos finales para Laravel
+RUN chown -R laravel:laravel /var/www/storage /var/www/bootstrap/cache
+
+# Cambiar al usuario no raíz
+USER laravel
 
 # Exponer el puerto
 EXPOSE 9000
 
 # Script de entrada
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chown=laravel:laravel docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

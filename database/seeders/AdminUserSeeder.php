@@ -15,15 +15,16 @@ class AdminUserSeeder extends Seeder
     {
         $adminEmail = config('admin.email');
 
-        if (!$adminEmail) {
+        if (! $adminEmail) {
             $this->command->warn('ADMIN_EMAIL is not configured. Skipping admin user creation.');
+
             return;
         }
 
         // Crear usuario admin si no existe
         $user = User::where('email', $adminEmail)->first();
 
-        if (!$user) {
+        if (! $user) {
             User::create([
                 'name' => 'Admin User',
                 'email' => $adminEmail,

@@ -21,7 +21,7 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "8080:80"
       - "5173:5173" # Puerto por defecto de Vite
     volumes:
       - ./:/var/www

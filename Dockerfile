@@ -23,6 +23,9 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && docker-php-ext-enable redis \
     && apk del .build-deps
 
+# Crear usuario no privilegiado para la aplicación
+RUN addgroup -S laravel && adduser -S laravel -G laravel
+
 # Configurar directorio de trabajo
 WORKDIR /var/www
 
@@ -48,9 +51,6 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Configurar OPcache
 COPY docker/php/opcache.ini "$PHP_INI_DIR/conf.d/opcache.ini"
-
-# Crear usuario no privilegiado para la aplicación
-RUN addgroup -S laravel && adduser -S laravel -G laravel
 
 # Copiar Composer binario
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

@@ -30,6 +30,12 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
 fi
 
+# Ejecutar seeders si se solicita
+if [ "$RUN_SEEDER" = "true" ]; then
+    echo "Ejecutando seeders..."
+    php artisan db:seed --force
+fi
+
 # Ejecutar optimizaciones en producción
 if [ "$APP_ENV" = "production" ]; then
     echo "Optimizando Laravel para producción..."

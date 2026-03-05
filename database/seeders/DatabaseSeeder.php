@@ -17,12 +17,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(CarSeeder::class);
 
-        User::factory(15)->create();
-
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => (string) config('admin.email', 'test@example.com'),
-            'password' => 'password',
-        ]);
+        // Crear usuario admin si no existe, evitando factories (Faker) en producción
+        if (!User::where('email', 'test@example.com')->exists()) {
+            User::create([
+                'name' => 'Admin User',
+                'email' => 'test@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]);
+        }
     }
 }

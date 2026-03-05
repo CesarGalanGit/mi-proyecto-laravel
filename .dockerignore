@@ -1,79 +1,19 @@
-# === Version Control ===
 .git
 .github
-.gitlab-ci.yml
-.gitignore
-.gitattributes
-
-# === Dependencies ===
-node_modules
-vendor
-
-# === Environment Files ===
 .env
-.env.*
-!.env.example
-
-# === IDE & Editor ===
-.idea
-.vscode
-*.sublime-project
-*.sublime-workspace
-*.code-workspace
-.fleet
-.zed
-
-# === Testing & Coverage ===
-tests
-phpunit.xml
-phpunit.result.cache
-coverage
-.pulse
-
-# === Build Artifacts ===
-public/build
-npm-debug.log
-yarn-error.log
-pnpm-debug.log
-
-# === Storage (runtime data) ===
-storage/*.key
-storage/app/public
-storage/framework/cache/data/*
-storage/framework/sessions/*
-storage/framework/views/*
-storage/logs/*
-!storage/framework
-!storage/framework/cache
-!storage/framework/sessions
-!storage/framework/views
-!storage/logs/.gitignore
-
-# === Bootstrap Cache ===
-bootstrap/cache/*.php
-!bootstrap/cache/.gitignore
-!bootstrap/cache/packages.php
-!bootstrap/cache/services.php
-
-# === Cache Files ===
-.cache
-.envrc
-.direnv
-
-# === OS ===
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# === Docker ===
-Dockerfile
-docker-compose*.yml
-.compose.yaml
-.dockerignore
-
-# === Misc ===
+.env.testing
+.env.dusk.local
+/node_modules
+/vendor
+/storage/framework/cache
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+/bootstrap/cache
+/public/hot
+/public/storage
+*.log
+docker-compose.yml
+docker-compose.prod.yml
 README.md
-CHANGELOG.md
-LICENSE
-UPGRADE.md
-

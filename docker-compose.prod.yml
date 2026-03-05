@@ -1,182 +1,63 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: mi-proyecto-laravel:latest
-    ports:
-      - "${APP_PORT:-80}:80"
-      - "${HTTPS_PORT:-443}:443"
-    environment:
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL:-http://localhost}
-      
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-prueba_php}
-      DB_USERNAME: ${DB_USERNAME:-sail}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
-      
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_CLIENT: phpredis
-      
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
-      CACHE_STORE: ${CACHE_STORE:-redis}
-      SESSION_DRIVER: ${SESSION_DRIVER:-database}
-      
-      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-      LOG_CHANNEL: stderr
-      LOG_STACK: null
+    # Sustituye 'tu_usuario_dockerhub' por tu usuario real en el servidor o usa una variable de entorno .env en producción
+    image: ${DOCKER_IMAGE:-tu_usuario_dockerhub/mi-proyecto-laravel:latest}
+    container_name: app
+    restart: always
+    working_dir: /var/www
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - mysql
+      - redis
+    networks:
+      - laravel-prod
+
+  web:
+    image: nginx:alpine
+    container_name: web
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
-      - app_storage:/app/storage
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      # Nnginx solo necesita leer estáticos, compartimos el public folder a través de un volumen nombrado o montando el repo
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - public-data:/var/www/public:ro
+    depends_on:
+      - app
+    networks:
+      - laravel-prod
 
   mysql:
     image: mysql:8.4
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    restart: unless-stopped
+    container_name: mysql
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_DATABASE:-prueba_php}
-      MYSQL_USER: ${DB_USERNAME:-sail}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_USER: '${DB_USERNAME}'
     volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-password}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-
-  worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: worker
-    image: mi-proyecto-laravel:worker
-    environment:
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL:-http://localhost}
-      
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-prueba_php}
-      DB_USERNAME: ${DB_USERNAME:-sail}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
-      
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_CLIENT: phpredis
-      
-      QUEUE_CONNECTION: redis
-      LOG_CHANNEL: stderr
-      LOG_STACK: null
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      app:
-        condition: service_healthy
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 512M
+      - db-prod-data:/var/lib/mysql
+    networks:
+      - laravel-prod
 
   redis:
-    image: redis:7.2-alpine
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes --save 60 1
-    restart: unless-stopped
+    image: redis:alpine
+    container_name: redis
+    restart: always
     volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    deploy:
-      resources:
-        limits:
-          memory: 256M
+      - redis-prod-data:/data
+    networks:
+      - laravel-prod
 
-  cron:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: worker
-    image: mi-proyecto-laravel:cron
-    command: ["sh", "-c", "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"]
-    environment:
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL:-http://localhost}
-      
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-prueba_php}
-      DB_USERNAME: ${DB_USERNAME:-sail}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
-      
-      QUEUE_CONNECTION: redis
-      LOG_CHANNEL: stderr
-      LOG_STACK: null
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
+networks:
+  laravel-prod:
+    driver: bridge
 
 volumes:
-  mysql_data:
+  db-prod-data:
     driver: local
-  redis_data:
+  redis-prod-data:
     driver: local
-  app_storage:
+  public-data:
     driver: local

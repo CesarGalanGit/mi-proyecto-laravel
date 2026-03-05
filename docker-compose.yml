@@ -3,76 +3,71 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: dev
-    image: mi-proyecto-laravel:dev
-    ports:
-      - "${APP_PORT:-80}:80"
-      - "${VITE_PORT:-5173}:5173"
-    environment:
-      APP_ENV: local
-      APP_DEBUG: true
-      APP_KEY: ${APP_KEY}
-      APP_URL: ${APP_URL:-http://localhost}
-      
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-prueba_php}
-      DB_USERNAME: ${DB_USERNAME:-sail}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
-      
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_CLIENT: phpredis
-      
-      QUEUE_CONNECTION: sync
-      CACHE_STORE: array
-      SESSION_DRIVER: array
-      
-      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-    # En desarrollo, la imagen ya incluye todo (vendor, node_modules)
-    # Para cambios en código, reconstruir la imagen
+    image: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    restart: no
+      - mysql
+      - redis
+    networks:
+      - laravel
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "5173:5173" # Puerto por defecto de Vite
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - laravel
 
   mysql:
     image: mysql:8.4
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: unless-stopped
     ports:
-      - "${FORWARD_DB_PORT:-3306}:3306"
+      - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
-      MYSQL_DATABASE: ${DB_DATABASE:-prueba_php}
-      MYSQL_USER: ${DB_USERNAME:-sail}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: '${DB_DATABASE:-prueba-php}'
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-password}'
+      MYSQL_PASSWORD: '${DB_PASSWORD:-password}'
+      MYSQL_USER: '${DB_USERNAME:-sail}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     volumes:
-      - sail-mysql:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-password}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - db-data:/var/lib/mysql
+    networks:
+      - laravel
 
   redis:
-    image: redis:7.2-alpine
+    image: redis:alpine
+    restart: unless-stopped
     ports:
-      - "${FORWARD_REDIS_PORT:-6379}:6379"
+      - "6379:6379"
     volumes:
-      - sail-redis:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      - redis-data:/data
+    networks:
+      - laravel
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
 
 volumes:
-  sail-mysql:
+  db-data:
     driver: local
-  sail-redis:
+  redis-data:
     driver: local

@@ -64,6 +64,14 @@ COPY --from=node-build /app/public/build /var/www/public/build
 # Copiar el resto de la aplicación con los permisos correctos
 COPY --chown=laravel:laravel . /var/www
 
+# Crear directorios necesarios para Laravel que suelen estar ignorados en .dockerignore
+RUN mkdir -p /var/www/storage/app/public \
+    /var/www/storage/framework/cache \
+    /var/www/storage/framework/sessions \
+    /var/www/storage/framework/views \
+    /var/www/storage/logs \
+    /var/www/bootstrap/cache
+
 # Generar el autoloader de Composer optimizado (sin scripts para evitar fallos de Artisan en build)
 RUN composer dump-autoload --optimize --no-dev --no-scripts
 

@@ -45,29 +45,29 @@ COPY resources ./resources
 RUN npm run build
 
 # Stage 4: Production Image (Apache for single-container deployment)
-FROM php:8.3-apache-alpine AS production
+FROM php:8.3-apache AS production
 
-# Instalar extensiones necesarias en la imagen de producción final
-RUN apk add --no-cache \
-    icu-dev \
+# Instalar dependencias necesarias (usando apt-get ya que esta imagen es Debian)
+RUN apt-get update && apt-get install -y \
     libpng-dev \
     libzip-dev \
-    oniguruma-dev \
+    libicu-dev \
+    libonig-dev \
     libxml2-dev \
-    bash \
-    mysql-client
+    zip \
+    unzip \
+    git \
+    curl \
+    mariadb-client \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom
 
 # Configurar Apache: Cambiar DocumentRoot a /var/www/public y habilitar mod_rewrite
 ENV APACHE_DOCUMENT_ROOT /var/www/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/httpd.conf \
-    && sed -ri -e 's!/var/www/localhost/htdocs!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/httpd.conf \
-    && echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/apache2/httpd.conf \
-    && echo "<Directory ${APACHE_DOCUMENT_ROOT}>" >> /etc/apache2/httpd.conf \
-    && echo "    AllowOverride All" >> /etc/apache2/httpd.conf \
-    && echo "    Require all granted" >> /etc/apache2/httpd.conf \
-    && echo "</Directory>" >> /etc/apache2/httpd.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && a2enmod rewrite
 
 # Usar configuración de producción de PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
@@ -107,7 +107,5 @@ EXPOSE 80
 COPY --chown=www-data:www-data docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Render espera que el contenedor corra en el puerto que ellos asignan, 
-# pero Apache por defecto va al 80.
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["httpd", "-D", "FOREGROUND"]
+CMD ["apache2-foreground"]

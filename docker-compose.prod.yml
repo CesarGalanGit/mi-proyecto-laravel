@@ -1,9 +1,19 @@
 services:
   app:
-    image: ${DOCKER_IMAGE:-tu_usuario_dockerhub/mi-proyecto-laravel:latest}
-    container_name: app
+    image: ${DOCKER_IMAGE:-laravel-app-prod:latest}
+    container_name: app-prod
     restart: always
     working_dir: /var/www
+    environment:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      DB_DATABASE: '${DB_DATABASE:-prueba-php}'
+      DB_USERNAME: '${DB_USERNAME:-sail}'
+      DB_PASSWORD: '${DB_PASSWORD:-password}'
+      DB_HOST: mysql
+      REDIS_HOST: redis
+    volumes:
+      - public-data:/var/www/public
     depends_on:
       mysql:
         condition: service_healthy
@@ -14,11 +24,10 @@ services:
 
   web:
     image: nginx:alpine
-    container_name: web
+    container_name: web-prod
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8081:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - public-data:/var/www/public:ro

@@ -28,6 +28,7 @@ RUN addgroup -S laravel && adduser -S laravel -G laravel
 
 # Configurar directorio de trabajo
 WORKDIR /var/www
+RUN chown laravel:laravel /var/www
 
 # Stage 2: Composer Build
 FROM composer:latest AS composer-build

@@ -67,6 +67,7 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opca
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && printf "<Directory ${APACHE_DOCUMENT_ROOT}>\n\tAllowOverride All\n\tRequire all granted\n</Directory>\n" >> /etc/apache2/apache2.conf \
     && a2enmod rewrite
 
 # Usar configuración de producción de PHP

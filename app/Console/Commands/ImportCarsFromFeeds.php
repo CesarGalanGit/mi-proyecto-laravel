@@ -8,9 +8,9 @@ use App\Services\CarImport\Connectors\CarConnector;
 use App\Services\CarImport\Connectors\CochesNetConnector;
 use App\Services\CarImport\Connectors\MilanunciosConnector;
 use App\Services\CarImport\Connectors\WallapopConnector;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ImportCarsFromFeeds extends Command
 {
@@ -199,6 +199,7 @@ class ImportCarsFromFeeds extends Command
         } catch (\Throwable $e) {
             // Si falla la subida, mantenemos la URL original para no perder la imagen
             report($e);
+
             return $url;
         }
     }

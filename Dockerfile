@@ -42,6 +42,9 @@ RUN npm run build
 # Stage 4: Production Image
 FROM php-base AS production
 
+# Copiar Composer binario
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Copiar dependencias de Composer
 COPY --from=composer-build /app/vendor /var/www/vendor
 

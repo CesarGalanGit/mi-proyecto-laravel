@@ -1,42 +1,68 @@
-FROM php:8.3-fpm
+# Stage 1: PHP Base
+FROM php:8.3-fpm-alpine AS php-base
 
-# Instalar dependencias del sistema requeridas
-RUN apt-get update && apt-get install -y \
+# Instalar dependencias del sistema y extensiones de PHP
+RUN apk add --no-cache \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
+    libzip-dev \
     zip \
     unzip \
-    libzip-dev
+    icu-dev \
+    oniguruma-dev \
+    bash \
+    mysql-client
 
-# Limpiar cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Instalar extensiones de PHP necesarias para Laravel
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip
 
 # Instalar extensión de Redis
-RUN pecl install redis && docker-php-ext-enable redis
-
-# Obtener e instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Instalar Node.js (para compilar frontend assets con Vite)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del .build-deps
 
 # Configurar directorio de trabajo
 WORKDIR /var/www
 
+# Stage 2: Composer Build
+FROM composer:latest AS composer-build
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Stage 3: Node Build
+FROM node:20-alpine AS node-build
+WORKDIR /app
+COPY package.json package-lock.json vite.config.js ./
+RUN npm install
+COPY resources ./resources
+RUN npm run build
+
+# Stage 4: Production Image
+FROM php-base AS production
+
+# Copiar dependencias de Composer
+COPY --from=composer-build /app/vendor /var/www/vendor
+
+# Copiar assets compilados
+COPY --from=node-build /app/public/build /var/www/public/build
+
+# Copiar el resto de la aplicación
+COPY . /var/www
+
+# Generar el autoloader de Composer optimizado
+RUN composer dump-autoload --optimize --no-dev
+
+# Ajustar permisos
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
 # Exponer el puerto
 EXPOSE 9000
 
-# Copiar el script de entrada y asignarle permisos de ejecución
+# Script de entrada
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Definir el script de entrada y el comando por defecto (PHP-FPM)
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]

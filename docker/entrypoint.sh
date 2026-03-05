@@ -20,6 +20,12 @@ if [ ! -f "/var/www/.env" ]; then
     php artisan key:generate --force
 fi
 
+# Ejecutar migraciones si se solicita
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    echo "Ejecutando migraciones..."
+    php artisan migrate --force
+fi
+
 # Ejecutar optimizaciones en producción
 if [ "$APP_ENV" = "production" ]; then
     echo "Optimizando Laravel para producción..."

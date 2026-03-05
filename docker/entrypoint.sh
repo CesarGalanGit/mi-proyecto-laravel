@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-# Si el usuario es root, ajustar permisos y cambiar al usuario laravel si es necesario
-# (Aunque en el Dockerfile ya definimos USER laravel, por si acaso se corre distinto)
+# Detectar el usuario del servidor web (www-data en Apache, laravel en FPM/Alpine)
+WWW_USER="www-data"
+if id "laravel" >/dev/null 2>&1; then
+    WWW_USER="laravel"
+fi
+
 if [ "$(id -u)" = '0' ]; then
-    chown -R laravel:laravel /var/www/storage /var/www/bootstrap/cache
+    chown -R $WWW_USER:$WWW_USER /var/www/storage /var/www/bootstrap/cache
 fi
 
 # Verificar si las dependencias de Composer no están instaladas

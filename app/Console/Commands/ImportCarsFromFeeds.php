@@ -10,6 +10,7 @@ use App\Services\CarImport\Connectors\MilanunciosConnector;
 use App\Services\CarImport\Connectors\WallapopConnector;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ImportCarsFromFeeds extends Command
 {
@@ -171,11 +172,35 @@ class ImportCarsFromFeeds extends Command
             'source_name' => $connector->label(),
             'source_url' => $sourceUrl,
             'source_external_id' => $sourceExternalId,
-            'thumbnail_url' => (string) ($listing['thumbnail_url'] ?? null),
+            'thumbnail_url' => $this->uploadToCloudinary((string) ($listing['thumbnail_url'] ?? null)),
             'gallery' => is_array($listing['gallery'] ?? null) ? $listing['gallery'] : [],
             'description' => (string) ($listing['description'] ?? 'Anuncio importado automáticamente desde portal externo.'),
             'last_synced_at' => now(),
         ];
+    }
+
+    private function uploadToCloudinary(?string $url): ?string
+    {
+        if (blank($url)) {
+            return null;
+        }
+
+        try {
+            // Solo subimos si es una URL externa válida
+            if (!str_starts_with($url, 'http')) {
+                return $url;
+            }
+
+            $uploadedFileUrl = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($url, [
+                'folder' => 'cars_aggregator',
+            ])->getSecurePath();
+
+            return $uploadedFileUrl;
+        } catch (\Throwable $e) {
+            // Si falla la subida, mantenemos la URL original para no perder la imagen
+            report($e);
+            return $url;
+        }
     }
 
     /**

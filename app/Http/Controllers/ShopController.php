@@ -26,7 +26,9 @@ class ShopController extends Controller
                     $query
                         ->where('brand', 'LIKE', "%{$search}%")
                         ->orWhere('model', 'LIKE', "%{$search}%")
-                        ->orWhere('city', 'LIKE', "%{$search}%");
+                        ->orWhere('city', 'LIKE', "%{$search}%")
+                        ->orWhere('description', 'LIKE', "%{$search}%")
+                        ->orWhere(DB::raw("CONCAT(brand, ' ', model)"), 'LIKE', "%{$search}%");
                 });
             })
             ->when($fuel !== '', function ($query) use ($fuel) {

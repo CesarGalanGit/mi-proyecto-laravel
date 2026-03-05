@@ -12,9 +12,10 @@ RUN apk add --no-cache \
     icu-dev \
     oniguruma-dev \
     bash \
-    mysql-client
+    mysql-client \
+    libxml2-dev
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom
 
 # Instalar extensión de Redis
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
@@ -63,8 +64,8 @@ COPY --from=node-build /app/public/build /var/www/public/build
 # Copiar el resto de la aplicación con los permisos correctos
 COPY --chown=laravel:laravel . /var/www
 
-# Generar el autoloader de Composer optimizado
-RUN composer dump-autoload --optimize --no-dev
+# Generar el autoloader de Composer optimizado (sin scripts para evitar fallos de Artisan en build)
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Ajustar permisos finales para Laravel
 RUN chown -R laravel:laravel /var/www/storage /var/www/bootstrap/cache

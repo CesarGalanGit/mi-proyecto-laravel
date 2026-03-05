@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CarSeeder::class);
 
         // Crear usuario admin si no existe, evitando factories (Faker) en producción
-        if (!User::where('email', 'test@example.com')->exists()) {
+        if (! User::where('email', 'test@example.com')->exists()) {
             User::create([
                 'name' => 'Admin User',
                 'email' => 'test@example.com',

@@ -6,6 +6,7 @@ use App\Models\Car;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ShopController extends Controller
@@ -34,11 +35,22 @@ class ShopController extends Controller
                 $query->where('price', '<=', $maxPrice);
             });
 
-        if ($search !== '') {
-            $searchIds = Car::search($search)
-                ->take(1000)
-                ->keys()
-                ->all();
+         if ($search !== '') {
+             // Generar un token de usuario único para analytics (por sesión)
+             $userToken = $request->session()->get('algolia_user_token');
+             if (!$userToken) {
+                 $userToken = Str::uuid()->toString();
+                 $request->session()->put('algolia_user_token', $userToken);
+             }
+
+             $searchIds = Car::search($search)
+                 ->options([
+                     'userToken' => $userToken,
+                     'clickAnalytics' => true,
+                 ])
+                 ->take(1000)
+                 ->keys()
+                 ->all();
 
             if ($searchIds === []) {
                 $carsQuery->whereRaw('1 = 0');

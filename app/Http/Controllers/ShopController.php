@@ -46,6 +46,7 @@ class ShopController extends Controller
             $searchIds = Car::search($search)
                 ->options([
                     'analytics' => true,
+                    'enableAnalytics' => true,
                     'userToken' => $userToken,
                     'clickAnalytics' => true,
                 ])

@@ -99,7 +99,7 @@ return [
     |
     */
 
-    'identify' => env('SCOUT_IDENTIFY', false),
+    'identify' => env('SCOUT_IDENTIFY', true),
 
     /*
     |--------------------------------------------------------------------------

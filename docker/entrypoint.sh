@@ -43,7 +43,7 @@ if [ "$APP_ENV" = "production" ]; then
 fi
 
 # Auto-import Scout index on first boot (if Algolia driver, not queued, and not yet imported)
-if [ "${SCOUT_DRIVER:-}" = "algolia" ] && [ "${SCOUT_QUEUE:-}" != "true" ] && [ ! -f "/var/www/storage/framework/scout-imported" ]; then
+if [ "${SCOUT_DRIVER:-algolia}" = "algolia" ] && [ "${SCOUT_QUEUE:-false}" != "true" ]; then
     echo "Importando datos a Algolia (Scout)..."
     set +e
     php artisan scout:import "App\Models\Car"

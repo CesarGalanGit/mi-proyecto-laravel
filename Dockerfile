@@ -5,6 +5,7 @@ FROM php:8.3-fpm-alpine AS php-base
 RUN apk add --no-cache \
     git \
     curl \
+    curl-dev \
     libpng-dev \
     libzip-dev \
     zip \
@@ -15,7 +16,7 @@ RUN apk add --no-cache \
     mysql-client \
     libxml2-dev
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom curl
 
 # Instalar extensión de Redis
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
@@ -50,6 +51,7 @@ FROM php:8.3-apache AS production
 # Instalar dependencias necesarias (usando apt-get ya que esta imagen es Debian)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
+    libcurl4-openssl-dev \
     libzip-dev \
     libicu-dev \
     libonig-dev \
@@ -61,7 +63,7 @@ RUN apt-get update && apt-get install -y \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom curl
 
 # Configurar Apache: Cambiar DocumentRoot a /var/www/public y habilitar mod_rewrite
 ENV APACHE_DOCUMENT_ROOT /var/www/public

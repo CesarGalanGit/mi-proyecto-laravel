@@ -21,16 +21,6 @@ class ShopController extends Controller
 
         $carsQuery = Car::query()
             ->where('status', 'available')
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($query) use ($search) {
-                    $query
-                        ->where('brand', 'LIKE', "%{$search}%")
-                        ->orWhere('model', 'LIKE', "%{$search}%")
-                        ->orWhere('city', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%")
-                        ->orWhere(DB::raw("CONCAT(brand, ' ', model)"), 'LIKE', "%{$search}%");
-                });
-            })
             ->when($fuel !== '', function ($query) use ($fuel) {
                 $query->where('fuel_type', $fuel);
             })
@@ -43,6 +33,19 @@ class ShopController extends Controller
             ->when($maxPrice > 0, function ($query) use ($maxPrice) {
                 $query->where('price', '<=', $maxPrice);
             });
+
+        if ($search !== '') {
+            $searchIds = Car::search($search)
+                ->take(1000)
+                ->keys()
+                ->all();
+
+            if ($searchIds === []) {
+                $carsQuery->whereRaw('1 = 0');
+            } else {
+                $carsQuery->whereIn('id', $searchIds);
+            }
+        }
 
         if ($sort === 'price_asc') {
             $carsQuery->orderBy('price');

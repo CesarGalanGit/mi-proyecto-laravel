@@ -117,10 +117,15 @@ return [
         'secret' => env('ALGOLIA_SECRET', ''),
         'index' => env('ALGOLIA_INDEX', 'cars'),
         'index-settings' => [
-            // 'users' => [
-            //     'searchableAttributes' => ['id', 'name', 'email'],
-            //     'attributesForFaceting'=> ['filterOnly(email)'],
-            // ],
+            \App\Models\Car::class => [
+                'searchableAttributes' => ['name', 'brand', 'model', 'description', 'city'],
+                'attributesForFaceting' => [
+                    'filterOnly(fuel_type)',
+                    'filterOnly(transmission)',
+                    'filterOnly(status)',
+                    'filterOnly(source_name)',
+                ],
+            ],
         ],
     ],
 

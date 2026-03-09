@@ -52,6 +52,17 @@ if [ "${SCOUT_DRIVER:-}" = "algolia" ] && [ "${SCOUT_QUEUE:-}" != "true" ] && [ 
     if [ $IMP_EXIT -eq 0 ]; then
         touch /var/www/storage/framework/scout-imported
         echo "Importación completada."
+        # Sincronizar configuración de índices (searchableAttributes, faceting, etc.)
+        echo "Sincronizando configuración de índices Scout/Algolia..."
+        set +e
+        php artisan scout:sync-index-settings
+        SYNC_EXIT=$?
+        set -e
+        if [ $SYNC_EXIT -eq 0 ]; then
+            echo "Configuración de índices sincronizada."
+        else
+            echo "Advertencia: falló la sincronización de índices (código $SYNC_EXIT)."
+        fi
     else
         echo "Advertencia: la importación a Algolia falló (código $IMP_EXIT). Continuando..."
     fi

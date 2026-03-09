@@ -118,7 +118,7 @@ return [
         'index' => env('ALGOLIA_INDEX', 'cars'),
         'index-settings' => [
             \App\Models\Car::class => [
-                'searchableAttributes' => ['name', 'brand', 'model', 'description', 'city'],
+                'searchableAttributes' => ['name', 'brand', 'model'],
                 'attributesForFaceting' => [
                     'filterOnly(fuel_type)',
                     'filterOnly(transmission)',

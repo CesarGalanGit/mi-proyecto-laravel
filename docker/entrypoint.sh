@@ -42,6 +42,21 @@ if [ "$APP_ENV" = "production" ]; then
     php artisan optimize
 fi
 
+# Auto-import Scout index on first boot (if Algolia driver, not queued, and not yet imported)
+if [ "${SCOUT_DRIVER:-}" = "algolia" ] && [ "${SCOUT_QUEUE:-}" != "true" ] && [ ! -f "/var/www/storage/framework/scout-imported" ]; then
+    echo "Importando datos a Algolia (Scout)..."
+    set +e
+    php artisan scout:import "App\Models\Car"
+    IMP_EXIT=$?
+    set -e
+    if [ $IMP_EXIT -eq 0 ]; then
+        touch /var/www/storage/framework/scout-imported
+        echo "Importación completada."
+    else
+        echo "Advertencia: la importación a Algolia falló (código $IMP_EXIT). Continuando..."
+    fi
+fi
+
 # Ejecutar el comando pasado al contenedor (e.g. php-fpm)
 echo "Iniciando servicio..."
 exec "$@"

@@ -35,22 +35,22 @@ class ShopController extends Controller
                 $query->where('price', '<=', $maxPrice);
             });
 
-         if ($search !== '') {
-             // Generar un token de usuario único para analytics (por sesión)
-             $userToken = $request->session()->get('algolia_user_token');
-             if (!$userToken) {
-                 $userToken = Str::uuid()->toString();
-                 $request->session()->put('algolia_user_token', $userToken);
-             }
+        if ($search !== '') {
+            // Generar un token de usuario único para analytics (por sesión)
+            $userToken = $request->session()->get('algolia_user_token');
+            if (! $userToken) {
+                $userToken = Str::uuid()->toString();
+                $request->session()->put('algolia_user_token', $userToken);
+            }
 
-             $searchIds = Car::search($search)
-                 ->options([
-                     'userToken' => $userToken,
-                     'clickAnalytics' => true,
-                 ])
-                 ->take(1000)
-                 ->keys()
-                 ->all();
+            $searchIds = Car::search($search)
+                ->options([
+                    'userToken' => $userToken,
+                    'clickAnalytics' => true,
+                ])
+                ->take(1000)
+                ->keys()
+                ->all();
 
             if ($searchIds === []) {
                 $carsQuery->whereRaw('1 = 0');

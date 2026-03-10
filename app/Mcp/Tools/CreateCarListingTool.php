@@ -12,7 +12,7 @@ use Laravel\Mcp\Server\Attributes\Title;
 use Laravel\Mcp\Server\Tool;
 
 #[Title('Create Car Listing')]
-#[Description('Creates a new car listing / advertisement in the platform. Requires brand, model, year, and price. Returns the created listing data as JSON.')]
+#[Description('Creates a new car listing / advertisement in the platform. Requires brand, model, year, price, url, and image_url. Returns the created listing data as JSON.')]
 class CreateCarListingTool extends Tool
 {
     /**
@@ -25,6 +25,8 @@ class CreateCarListingTool extends Tool
             'model' => 'required|string|max:100',
             'year' => 'required|integer|min:1900|max:2030',
             'price' => 'required|numeric|min:0',
+            'url' => 'required|url|max:2000',
+            'image_url' => 'required|url|max:2000',
             'mileage' => 'nullable|integer|min:0',
             'fuel_type' => 'nullable|string|in:gasolina,diesel,electrico,hibrido,gas',
             'transmission' => 'nullable|string|in:manual,automatico',
@@ -39,6 +41,8 @@ class CreateCarListingTool extends Tool
             'year.min' => 'The year must be 1900 or later.',
             'price.required' => 'You must provide a price in euros. Example: 15000.',
             'price.min' => 'The price must be zero or greater.',
+            'url.required' => 'You must provide the URL of the listing.',
+            'image_url.required' => 'You must provide the image URL of the listing.',
             'fuel_type.in' => 'Fuel type must be one of: gasolina, diesel, electrico, hibrido, gas.',
             'transmission.in' => 'Transmission must be either: manual, automatico.',
             'status.in' => 'Status must be one of: available, sold, reserved.',
@@ -58,6 +62,8 @@ class CreateCarListingTool extends Tool
             'color' => $validated['color'] ?? null,
             'city' => $validated['city'] ?? null,
             'description' => $validated['description'] ?? null,
+            'source_url' => $validated['url'],
+            'thumbnail_url' => $validated['image_url'],
             'status' => $validated['status'] ?? 'available',
             'featured' => false,
         ]);
@@ -72,6 +78,8 @@ class CreateCarListingTool extends Tool
                 'model' => $car->model,
                 'year' => $car->year,
                 'price' => $car->price,
+                'url' => $car->source_url,
+                'image_url' => $car->thumbnail_url,
                 'fuel_type' => $car->fuel_type,
                 'transmission' => $car->transmission,
                 'color' => $car->color,
@@ -104,6 +112,14 @@ class CreateCarListingTool extends Tool
 
             'price' => $schema->number()
                 ->description('Price in euros. Example: 15000.00.')
+                ->required(),
+
+            'url' => $schema->string()
+                ->description('URL of the external listing.')
+                ->required(),
+
+            'image_url' => $schema->string()
+                ->description('URL of the listing image/thumbnail.')
                 ->required(),
 
             'mileage' => $schema->integer()

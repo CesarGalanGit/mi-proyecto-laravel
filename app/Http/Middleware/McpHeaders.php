@@ -10,10 +10,6 @@ class McpHeaders
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
@@ -22,7 +18,7 @@ class McpHeaders
         if ($response instanceof StreamedResponse || $request->is('mcp/*')) {
             // Disable buffering for Nginx (Render proxy) and Apache
             $response->headers->set('X-Accel-Buffering', 'no');
-            
+
             // Ensure SSE headers for streaming
             if ($response->headers->get('Content-Type') === 'text/event-stream') {
                 $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');

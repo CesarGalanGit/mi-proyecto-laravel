@@ -68,6 +68,31 @@ class Car extends Model
         return $this->hasMany(CarReferralClick::class);
     }
 
+    public function getFuelTypeAttribute($value): ?string
+    {
+        return $value ? ucfirst($value) : null;
+    }
+
+    public function getTransmissionAttribute($value): ?string
+    {
+        return $value ? ucfirst($value) : null;
+    }
+
+    public function getColorAttribute($value): ?string
+    {
+        return $value ? ucfirst($value) : null;
+    }
+
+    public function getCityAttribute($value): ?string
+    {
+        return $value ? ucfirst($value) : null;
+    }
+
+    public function getSourceNameAttribute($value): ?string
+    {
+        return $value ? ucfirst($value) : null;
+    }
+
     public function searchableAs(): string
     {
         return (string) config('scout.algolia.index', 'cars');

@@ -34,6 +34,8 @@ class CreateCarListingTool extends Tool
             'city' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:2000',
             'status' => 'nullable|string|in:available,sold,reserved',
+            'source_name' => 'nullable|string|max:100',
+            'source_external_id' => 'nullable|string|max:255',
         ], [
             'brand.required' => 'You must provide the car brand. Example: "Toyota", "BMW", "Seat".',
             'model.required' => 'You must provide the car model. Example: "Corolla", "X3", "Ibiza".',
@@ -63,6 +65,8 @@ class CreateCarListingTool extends Tool
             'city' => $validated['city'] ?? null,
             'description' => $validated['description'] ?? null,
             'source_url' => $validated['url'],
+            'source_name' => $validated['source_name'] ?? null,
+            'source_external_id' => $validated['source_external_id'] ?? null,
             'thumbnail_url' => $validated['image_url'],
             'status' => $validated['status'] ?? 'available',
             'featured' => false,
@@ -85,6 +89,8 @@ class CreateCarListingTool extends Tool
                 'color' => $car->color,
                 'city' => $car->city,
                 'status' => $car->status,
+                'source_name' => $car->source_name,
+                'source_external_id' => $car->source_external_id,
                 'created_at' => $car->created_at->toIso8601String(),
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -148,6 +154,12 @@ class CreateCarListingTool extends Tool
                 ->enum(['available', 'sold', 'reserved'])
                 ->description('Listing status.')
                 ->default('available'),
+
+            'source_name' => $schema->string()
+                ->description('Name of the source/portal (e.g., "coches.net", "milanuncios.com").'),
+
+            'source_external_id' => $schema->string()
+                ->description('External ID from the source portal or MD5 hash of the URL.'),
         ];
     }
 }

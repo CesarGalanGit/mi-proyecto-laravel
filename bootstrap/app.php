@@ -11,14 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            Route::middleware('web')
+            Route::middleware('api')
                 ->group(base_path('routes/ai.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: [
-            'mcp/*',
+            //
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

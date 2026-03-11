@@ -31,8 +31,6 @@ Route::prefix('tienda')->name('shop.')->group(function () {
     Route::get('/coches/{car:slug}/ir', [ShopController::class, 'outbound'])->name('outbound');
 });
 
-Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-
 Route::middleware(['auth', 'can:manage-users'])->group(function () {
     Route::get('/admin/mcp-token', [McpTokenController::class, 'show'])->name('admin.mcp-token.show');
     Route::post('/admin/mcp-token', [McpTokenController::class, 'store'])->name('admin.mcp-token.store');
@@ -47,6 +45,7 @@ Route::middleware(['auth', 'can:manage-users'])->group(function () {
         Route::patch('/pedidos/{order:id}', [OrderAdminController::class, 'update'])->name('orders.update');
     });
 
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 
     /*

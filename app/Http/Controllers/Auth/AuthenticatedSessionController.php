@@ -22,7 +22,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('usuarios.index'));
+        $user = $request->user();
+        $default = ($user !== null && $user->can('manage-users'))
+            ? route('usuarios.index')
+            : route('dashboard');
+
+        $intended = redirect()->getIntendedUrl();
+        if ($intended !== null && ($user === null || ! $user->can('manage-users'))) {
+            $path = (string) parse_url($intended, PHP_URL_PATH);
+            if (str_starts_with($path, '/usuarios') || str_starts_with($path, '/admin')) {
+                $request->session()->forget('url.intended');
+            }
+        }
+
+        return redirect()->intended($default);
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -32,6 +45,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('usuarios.index');
+        return redirect()->route('dashboard');
     }
 }

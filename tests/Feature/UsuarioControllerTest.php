@@ -27,11 +27,18 @@ class UsuarioControllerTest extends TestCase
     {
         User::factory(3)->create();
 
-        $response = $this->get('/usuarios');
+        $response = $this->authenticateAsAdmin()->get('/usuarios');
 
         $response->assertStatus(200);
         $response->assertViewIs('usuarios');
         $response->assertViewHas('usuarios');
+    }
+
+    public function test_guest_no_puede_ver_usuarios(): void
+    {
+        $response = $this->get('/usuarios');
+
+        $response->assertRedirect('/login');
     }
 
     public function test_store_crea_usuario_valido(): void
@@ -148,7 +155,7 @@ class UsuarioControllerTest extends TestCase
         User::factory()->create(['name' => 'Carlos Pérez']);
         User::factory()->create(['name' => 'Ana López']);
 
-        $response = $this->get('/usuarios?buscar=Carlos');
+        $response = $this->authenticateAsAdmin()->get('/usuarios?buscar=Carlos');
 
         $response->assertStatus(200);
         $response->assertSee('Carlos Pérez');
@@ -158,7 +165,7 @@ class UsuarioControllerTest extends TestCase
     {
         User::factory(10)->create();
 
-        $response = $this->get('/usuarios?per_page=5');
+        $response = $this->authenticateAsAdmin()->get('/usuarios?per_page=5');
 
         $response->assertStatus(200);
         $response->assertViewHas('usuarios', function ($usuarios) {
@@ -181,7 +188,7 @@ class UsuarioControllerTest extends TestCase
         User::factory()->create(['email' => 'carlos@test.com']);
         User::factory()->create(['email' => 'ana@test.com']);
 
-        $response = $this->get('/usuarios?buscar=carlos@test.com');
+        $response = $this->authenticateAsAdmin()->get('/usuarios?buscar=carlos@test.com');
 
         $response->assertStatus(200);
         $response->assertSee('carlos@test.com');
@@ -192,7 +199,7 @@ class UsuarioControllerTest extends TestCase
     {
         User::factory(10)->create();
 
-        $response = $this->get('/usuarios?per_page=999');
+        $response = $this->authenticateAsAdmin()->get('/usuarios?per_page=999');
 
         $response->assertStatus(200);
         $response->assertViewHas('usuarios', function ($usuarios) {

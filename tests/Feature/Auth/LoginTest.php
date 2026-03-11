@@ -30,7 +30,7 @@ class LoginTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_login_valido_redirige_a_usuarios(): void
+    public function test_login_valido_redirige_a_dashboard_para_usuario_normal(): void
     {
         /** @var User $user */
         $user = User::factory()->create([
@@ -43,7 +43,7 @@ class LoginTest extends TestCase
             'password' => 'secret1234',
         ]);
 
-        $response->assertRedirect('/usuarios');
+        $response->assertRedirect('/');
         $this->assertAuthenticated();
     }
 
@@ -61,7 +61,7 @@ class LoginTest extends TestCase
             'remember' => 'on',
         ]);
 
-        $response->assertRedirect('/usuarios');
+        $response->assertRedirect('/');
         $this->assertAuthenticated();
 
         $rememberCookie = collect($response->headers->getCookies())->first(
@@ -122,7 +122,24 @@ class LoginTest extends TestCase
 
         $response = $this->actingAs($user)->post('/logout');
 
-        $response->assertRedirect('/usuarios');
+        $response->assertRedirect('/');
         $this->assertGuest();
+    }
+
+    public function test_login_admin_redirige_a_usuarios(): void
+    {
+        /** @var User $admin */
+        $admin = User::factory()->create([
+            'email' => (string) config('admin.email', 'test@example.com'),
+            'password' => 'secret1234',
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => $admin->email,
+            'password' => 'secret1234',
+        ]);
+
+        $response->assertRedirect('/usuarios');
+        $this->assertAuthenticated();
     }
 }

@@ -47,7 +47,7 @@
                     </div>
                     <p class="text-lg font-semibold text-slate-900 dark:text-white">Laravel Studio</p>
                 </div>
-                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <div class="w-10 h-10 rounded-2xl bg-linear-to-br from-sky-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -61,7 +61,7 @@
             @if ($errors->any())
                 <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl p-4" role="alert" aria-live="polite">
                     <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <div>
@@ -134,7 +134,7 @@
                 </label>
             </div>
 
-            <button id="loginSubmitButton" type="submit" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-xl hover:from-sky-500 hover:to-cyan-500 transition-all shadow-md shadow-cyan-500/20 disabled:opacity-70 disabled:cursor-not-allowed">
+            <button id="loginSubmitButton" type="submit" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-linear-to-r from-sky-600 to-cyan-600 rounded-xl hover:from-sky-500 hover:to-cyan-500 transition-all shadow-md shadow-cyan-500/20 disabled:opacity-70 disabled:cursor-not-allowed">
                 <svg id="loginSpinner" class="w-4 h-4 hidden animate-spin" viewBox="0 0 24 24" fill="none">
                     <circle class="opacity-30" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-90" fill="currentColor" d="M22 12a10 10 0 00-10-10v4a6 6 0 016 6h4z"></path>

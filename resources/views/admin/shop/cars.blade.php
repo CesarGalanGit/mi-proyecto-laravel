@@ -59,7 +59,7 @@
             </label>
 
             <div class="md:col-span-2 lg:col-span-2 flex justify-end">
-                <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 transition shadow-md shadow-cyan-500/20">Crear coche</button>
+                <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 transition shadow-md shadow-cyan-500/20">Crear coche</button>
             </div>
         </form>
 
@@ -162,7 +162,7 @@
                             </label>
 
                             <div class="md:col-span-2 lg:col-span-2 flex flex-wrap items-center justify-end gap-2">
-                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 transition">Guardar cambios</button>
+                                <button type="submit" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-linear-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 transition">Guardar cambios</button>
                             </div>
                         </form>
 

@@ -34,9 +34,18 @@
     <section class="animate-slide-up delay-1 bg-white/85 dark:bg-slate-900/80 rounded-3xl border border-slate-200/70 dark:border-slate-800/70 shadow-xl shadow-slate-950/5 overflow-hidden backdrop-blur">
         <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
             <div class="flex items-center justify-between gap-4">
-                <div>
-                    <p class="text-[11px] uppercase tracking-widest font-semibold text-slate-500 dark:text-slate-400">Portal administrativo</p>
-                    <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-white">Laravel Studio</p>
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('dashboard') }}" class="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Inicio
+                        </a>
+                        <span class="text-slate-300 dark:text-slate-700">|</span>
+                        <p class="text-[11px] uppercase tracking-widest font-semibold text-slate-500 dark:text-slate-400">Portal administrativo</p>
+                    </div>
+                    <p class="text-lg font-semibold text-slate-900 dark:text-white">Laravel Studio</p>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,10 +132,6 @@
                     <input type="checkbox" name="remember" @checked(old('remember')) class="rounded border-slate-300 dark:border-slate-700 text-cyan-600 focus:ring-cyan-500/30">
                     Recordarme en este equipo
                 </label>
-
-                <a href="{{ route('usuarios.index') }}" class="text-sm font-semibold text-cyan-700 dark:text-cyan-300 hover:underline">
-                    Volver al listado
-                </a>
             </div>
 
             <button id="loginSubmitButton" type="submit" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-cyan-600 rounded-xl hover:from-sky-500 hover:to-cyan-500 transition-all shadow-md shadow-cyan-500/20 disabled:opacity-70 disabled:cursor-not-allowed">

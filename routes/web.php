@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CarAdminController;
+use App\Http\Controllers\Admin\McpTokenController;
 use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
@@ -33,6 +34,9 @@ Route::prefix('tienda')->name('shop.')->group(function () {
 Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 
 Route::middleware(['auth', 'can:manage-users'])->group(function () {
+    Route::get('/admin/mcp-token', [McpTokenController::class, 'show'])->name('admin.mcp-token.show');
+    Route::post('/admin/mcp-token', [McpTokenController::class, 'store'])->name('admin.mcp-token.store');
+
     Route::prefix('admin/tienda')->name('admin.shop.')->group(function () {
         Route::get('/coches', [CarAdminController::class, 'index'])->name('cars.index');
         Route::post('/coches', [CarAdminController::class, 'store'])->name('cars.store');

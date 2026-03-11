@@ -85,6 +85,16 @@
                 @can('manage-users')
                     <p class="px-3 mt-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-sky-300/60">Admin tienda</p>
 
+                    <a href="{{ route('admin.mcp-token.show') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                              {{ request()->is('admin/mcp-token') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M12 11c0 1.657-1.343 3-3 3S6 12.657 6 11s1.343-3 3-3 3 1.343 3 3zm0 0h6m-3-3v6" />
+                        </svg>
+                        Token MCP
+                    </a>
+
                     <a href="{{ route('admin.shop.cars.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                               {{ request()->is('admin/tienda/coches*') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">

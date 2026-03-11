@@ -16,10 +16,11 @@ use Laravel\Mcp\Facades\Mcp;
 // Web-accessible MCP server (HTTP Streamable transport)
 Mcp::web('/mcp/app', AppServer::class)
     ->middleware([
-        'api',
         \App\Http\Middleware\McpHeaders::class,
-        \App\Http\Middleware\RequireMcpToken::class,
-    ]);
+        \App\Http\Middleware\RequireMcpUserToken::class,
+        'throttle:mcp',
+    ])
+    ->withoutMiddleware('throttle:api');
 
 // Local MCP server (stdio transport, for local AI tools like Boost/Cursor)
 Mcp::local('app', AppServer::class);

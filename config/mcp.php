@@ -15,4 +15,7 @@ return [
 
     // The header name to read the token from when not using Bearer auth.
     'web_header' => env('MCP_WEB_HEADER', 'X-MCP-Token'),
+
+    // Requests per minute for the web MCP endpoint.
+    'rate_limit_per_minute' => (int) env('MCP_RATE_LIMIT_PER_MINUTE', 60),
 ];

@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Database\QueryException;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('mcp', function (Request $request) {
+            $perMinute = (int) config('mcp.rate_limit_per_minute', 60);
+
+            $userId = (string) ($request->user('sanctum')?->getAuthIdentifier() ?? '');
+            $key = $userId !== ''
+                ? 'mcp|user:'.$userId
+                : 'mcp|ip:'.$request->ip();
+
+            return Limit::perMinute(max(1, $perMinute))
+                ->by($key);
+        });
+
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }

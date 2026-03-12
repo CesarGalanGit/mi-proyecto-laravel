@@ -1,54 +1,7 @@
-# Stage 1: PHP Base
-FROM php:8.3-fpm-alpine AS php-base
+# Stage 1: Base image with all necessary PHP extensions
+FROM php:8.3-apache AS base
 
-# Instalar dependencias del sistema y extensiones de PHP
-RUN apk add --no-cache \
-    git \
-    curl \
-    curl-dev \
-    libpng-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    icu-dev \
-    oniguruma-dev \
-    bash \
-    mysql-client \
-    libxml2-dev
-
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom curl
-
-# Instalar extensión de Redis
-RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apk del .build-deps
-
-# Crear usuario no privilegiado para la aplicación
-RUN addgroup -S laravel && adduser -S laravel -G laravel
-
-# Configurar directorio de trabajo
-WORKDIR /var/www
-RUN chown laravel:laravel /var/www
-
-# Stage 2: Composer Build
-FROM composer:latest AS composer-build
-WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
-
-# Stage 3: Node Build
-FROM node:20-alpine AS node-build
-WORKDIR /app
-COPY package.json package-lock.json vite.config.js ./
-RUN npm install
-COPY resources ./resources
-RUN npm run build
-
-# Stage 4: Production Image (Apache for single-container deployment)
-FROM php:8.3-apache AS production
-
-# Instalar dependencias necesarias (usando apt-get ya que esta imagen es Debian)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libcurl4-openssl-dev \
@@ -63,35 +16,55 @@ RUN apt-get update && apt-get install -y \
     mariadb-client \
     && rm -rf /var/lib/apt/lists/*
 
+# Install and enable PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl zip opcache xml dom curl
 
-# Configurar Apache: Cambiar DocumentRoot a /var/www/public y habilitar mod_rewrite
+# Install Redis extension
+RUN pecl install redis && docker-php-ext-enable redis
+
+# Configure Apache: Change DocumentRoot to /var/www/public and enable mod_rewrite
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && printf "<Directory ${APACHE_DOCUMENT_ROOT}>\n\tAllowOverride All\n\tRequire all granted\n</Directory>\n" >> /etc/apache2/apache2.conf \
     && a2enmod rewrite
 
-# Usar configuración de producción de PHP
+# Stage 2: Composer dependencies build
+FROM composer:latest AS composer-build
+WORKDIR /app
+COPY composer.json composer.lock ./
+# Note: No-dev and optimized autoloader are handled here for efficiency
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Stage 3: Node assets build
+FROM node:20-alpine AS node-build
+WORKDIR /app
+COPY package.json package-lock.json vite.config.js ./
+RUN npm install
+COPY resources ./resources
+RUN npm run build
+
+# Stage 4: Production Image
+FROM base AS production
+
+# Use production PHP configuration
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Configurar OPcache
+# Copy custom configurations (OPcache, etc.)
 COPY docker/php/opcache.ini "$PHP_INI_DIR/conf.d/opcache.ini"
 
-# Copiar Composer binario
+# Ensure Composer is available if needed (entrypoint might use it)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copiar dependencias de Composer
+# Copy Vendor and Assets from previous stages
+WORKDIR /var/www
 COPY --from=composer-build /app/vendor /var/www/vendor
-
-# Copiar assets compilados
 COPY --from=node-build /app/public/build /var/www/public/build
 
-# Copiar el resto de la aplicación con los permisos correctos
-WORKDIR /var/www
+# Copy the rest of the application files
 COPY --chown=www-data:www-data . /var/www
 
-# Crear directorios necesarios para Laravel
+# Create necessary Laravel directories and set permissions
 RUN mkdir -p /var/www/storage/app/public \
     /var/www/storage/framework/cache \
     /var/www/storage/framework/sessions \
@@ -100,13 +73,13 @@ RUN mkdir -p /var/www/storage/app/public \
     /var/www/bootstrap/cache \
     && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Generar el autoloader de Composer optimizado
+# Generate optimized Composer autoloader
 RUN composer dump-autoload --optimize --no-dev --no-scripts
 
-# Exponer el puerto de Apache
+# Expose Apache port
 EXPOSE 80
 
-# Script de entrada
+# Configure Entrypoint
 COPY --chown=www-data:www-data docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 

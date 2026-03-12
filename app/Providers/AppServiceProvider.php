@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use PDOException;
 
@@ -70,6 +71,13 @@ class AppServiceProvider extends ServiceProvider
                     'user' => $notifiable,
                     'url' => $url,
                 ]);
+        });
+
+        // Registro del driver de Brevo para Symfony Mailer
+        Mail::extend('brevo', function () {
+            return new \Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoApiTransport(
+                config('services.brevo.key')
+            );
         });
     }
 }

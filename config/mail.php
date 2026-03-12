@@ -65,8 +65,8 @@ return [
             'transport' => 'resend',
         ],
 
-        'mailjet' => [
-            'transport' => 'mailjet',
+        'brevo' => [
+            'transport' => 'brevo',
         ],
 
         'sendmail' => [
@@ -119,9 +119,8 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
-    'mailjet' => [
-        'key' => env('MAILJET_API_KEY'),
-        'secret' => env('MAILJET_SECRET_KEY'),
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
     ],
 
 ];

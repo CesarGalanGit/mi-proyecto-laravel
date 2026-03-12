@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\SendVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -51,5 +52,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Send the email verification notification asynchronously.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        SendVerifyEmail::dispatch($this);
     }
 }

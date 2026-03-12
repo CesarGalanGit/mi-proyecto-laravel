@@ -61,7 +61,6 @@ return [
             // ],
         ],
 
-
         'brevo' => [
             'transport' => 'brevo',
         ],

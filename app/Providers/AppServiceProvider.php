@@ -65,7 +65,7 @@ class AppServiceProvider extends ServiceProvider
         // Personalización de la notificación de verificación de email (Estilo Premium)
         \Illuminate\Auth\Notifications\VerifyEmail::toMailUsing(function ($notifiable, $url) {
             return (new \Illuminate\Notifications\Messages\MailMessage)
-                ->subject('¡Confirma tu cuenta en ' . config('app.name') . '!')
+                ->subject('¡Confirma tu cuenta en '.config('app.name').'!')
                 ->view('emails.verify-email', [
                     'user' => $notifiable,
                     'url' => $url,

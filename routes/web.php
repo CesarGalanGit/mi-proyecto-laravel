@@ -42,8 +42,10 @@ Route::middleware('auth')->group(function () {
         ->name('verification.send');
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+});
 
-    // Token MCP: disponible para cualquier usuario autenticado.
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Token MCP: ahora requiere verificación de email
     Route::get('/admin/mcp-token', [McpTokenController::class, 'show'])->name('admin.mcp-token.show');
     Route::post('/admin/mcp-token', [McpTokenController::class, 'store'])->name('admin.mcp-token.store');
 });

@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Middleware\EnsureCanManageUsers;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,7 +46,9 @@ Route::middleware(['auth', 'can:manage-users'])->group(function () {
         Route::get('/pedidos', [OrderAdminController::class, 'index'])->name('orders.index');
         Route::patch('/pedidos/{order:id}', [OrderAdminController::class, 'update'])->name('orders.update');
     });
+});
 
+Route::middleware(['auth', EnsureCanManageUsers::class])->group(function () {
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
 

@@ -41,6 +41,20 @@ class UsuarioControllerTest extends TestCase
         $response->assertRedirect('/login');
     }
 
+    public function test_usuario_no_admin_ve_vista_amigable_en_usuarios(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create([
+            'email' => 'user@test.com',
+        ]);
+
+        $response = $this->actingAs($user)->get('/usuarios');
+
+        $response->assertStatus(403);
+        $response->assertViewIs('usuarios.forbidden');
+        $response->assertSee('Necesitas permisos de administrador');
+    }
+
     public function test_store_crea_usuario_valido(): void
     {
         $response = $this->authenticateAsAdmin()->post('/usuarios', [

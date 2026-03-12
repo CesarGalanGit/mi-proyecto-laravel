@@ -119,8 +119,4 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
-    'brevo' => [
-        'key' => env('BREVO_API_KEY'),
-    ],
-
 ];

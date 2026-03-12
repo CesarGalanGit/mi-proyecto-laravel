@@ -28,9 +28,9 @@ class SendVerifyEmail implements ShouldQueue
             // Utilizamos el listener nativo de notificaciones que mandará la plantilla base de verificación.
             $this->user->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
         } catch (\Throwable $th) {
-            // Atrapamos silenciosamente la caída del Transport SMTP para que el trabajador de la cola 
+            // Atrapamos silenciosamente la caída del Transport SMTP para que el trabajador de la cola
             // no lo reintegre indefinidamente generando errores bloqueantes.
-            \Illuminate\Support\Facades\Log::error('SMTP Transport failed for VerifyEmail: ' . $th->getMessage());
+            \Illuminate\Support\Facades\Log::error('SMTP Transport failed for VerifyEmail: '.$th->getMessage());
         }
     }
 }

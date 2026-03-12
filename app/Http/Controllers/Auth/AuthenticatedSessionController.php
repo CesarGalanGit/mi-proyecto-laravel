@@ -30,7 +30,10 @@ class AuthenticatedSessionController extends Controller
         $intended = redirect()->getIntendedUrl();
         if ($intended !== null && ($user === null || ! $user->can('manage-users'))) {
             $path = (string) parse_url($intended, PHP_URL_PATH);
-            if (str_starts_with($path, '/usuarios') || str_starts_with($path, '/admin')) {
+            if (
+                str_starts_with($path, '/usuarios')
+                || (str_starts_with($path, '/admin') && ! str_starts_with($path, '/admin/mcp-token'))
+            ) {
                 $request->session()->forget('url.intended');
             }
         }

@@ -82,9 +82,7 @@
                     Tienda
                 </a>
 
-                @can('manage-users')
-                    <p class="px-3 mt-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-sky-300/60">Admin tienda</p>
-
+                @auth
                     <a href="{{ route('admin.mcp-token.show') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
                               {{ request()->is('admin/mcp-token') ? 'bg-white/15 text-white shadow-sm' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
@@ -94,6 +92,10 @@
                         </svg>
                         Token MCP
                     </a>
+                @endauth
+
+                @can('manage-users')
+                    <p class="px-3 mt-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-sky-300/60">Admin tienda</p>
 
                     <a href="{{ route('admin.shop.cars.index') }}"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200

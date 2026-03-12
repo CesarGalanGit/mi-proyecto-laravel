@@ -4,6 +4,7 @@ namespace App\Mcp\Tools;
 
 use App\Models\Car;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -15,6 +16,18 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Creates a new car listing / advertisement in the platform. Requires brand, model, year, price, url, and image_url. Returns the created listing data as JSON.')]
 class CreateCarListingTool extends Tool
 {
+    public function shouldRegister(): bool
+    {
+        $user = Auth::user();
+
+        // Local MCP server (stdio) runs without an authenticated user.
+        if ($user === null) {
+            return true;
+        }
+
+        return $user->can('manage-users');
+    }
+
     /**
      * Handle the tool request.
      */

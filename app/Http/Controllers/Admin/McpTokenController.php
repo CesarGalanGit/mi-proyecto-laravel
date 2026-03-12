@@ -16,9 +16,13 @@ class McpTokenController
     {
         $user = $request->user();
 
+        $abilities = $user !== null && $user->can('manage-users')
+            ? ['*']
+            : ['cars:list'];
+
         $user->tokens()->where('name', 'mcp')->delete();
 
-        $token = $user->createToken('mcp', ['*']);
+        $token = $user->createToken('mcp', $abilities);
 
         return view('admin.mcp-token', [
             'plainTextToken' => $token->plainTextToken,

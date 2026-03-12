@@ -4,6 +4,7 @@ namespace App\Mcp\Tools;
 
 use App\Models\Car;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -18,6 +19,24 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsIdempotent]
 class ListCarsTool extends Tool
 {
+    public function shouldRegister(): bool
+    {
+        $user = Auth::user();
+
+        // Local MCP server (stdio) runs without an authenticated user.
+        if ($user === null) {
+            return true;
+        }
+
+        // Admins always get full access.
+        if ($user->can('manage-users')) {
+            return true;
+        }
+
+        // Non-admin tokens can only list car listings.
+        return method_exists($user, 'tokenCan') && $user->tokenCan('cars:list');
+    }
+
     /**
      * Handle the tool request.
      */

@@ -15,10 +15,12 @@ class McpHeaders
     {
         $response = $next($request);
 
-        if ($response instanceof StreamedResponse || $request->is('mcp/*')) {
+        if ($request->is('mcp/*')) {
             // Disable buffering for Nginx (Render proxy) and Apache
             $response->headers->set('X-Accel-Buffering', 'no');
+        }
 
+        if ($response instanceof StreamedResponse) {
             // Ensure SSE headers for streaming
             if ($response->headers->get('Content-Type') === 'text/event-stream') {
                 $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -27,9 +29,12 @@ class McpHeaders
                 $response->headers->set('Connection', 'keep-alive');
             }
 
-            // Clean output buffers to prevent delays in streaming
-            while (ob_get_level() > 0) {
-                ob_end_clean();
+            // Clean output buffers to prevent delays in streaming.
+            // Avoid closing PHPUnit buffers when running tests.
+            if (! app()->runningUnitTests()) {
+                while (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
             }
         }
 

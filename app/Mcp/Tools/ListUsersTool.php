@@ -4,6 +4,7 @@ namespace App\Mcp\Tools;
 
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
@@ -18,6 +19,18 @@ use Laravel\Mcp\Server\Tools\Annotations\IsReadOnly;
 #[IsIdempotent]
 class ListUsersTool extends Tool
 {
+    public function shouldRegister(): bool
+    {
+        $user = Auth::user();
+
+        // Local MCP server (stdio) runs without an authenticated user.
+        if ($user === null) {
+            return true;
+        }
+
+        return $user->can('manage-users');
+    }
+
     /**
      * Handle the tool request.
      */

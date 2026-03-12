@@ -48,6 +48,27 @@ class McpTokenControllerTest extends TestCase
             'tokenable_type' => User::class,
             'tokenable_id' => $user->id,
             'name' => 'mcp',
+            'abilities' => '["cars:list"]',
+        ]);
+    }
+
+    public function test_admin_genera_token_mcp_con_acceso_completo(): void
+    {
+        $adminEmail = (string) config('admin.email', 'test@example.com');
+
+        /** @var User $admin */
+        $admin = User::factory()->create([
+            'email' => $adminEmail,
+        ]);
+
+        $this->actingAs($admin)->post('/admin/mcp-token')
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $admin->id,
+            'name' => 'mcp',
+            'abilities' => '["*"]',
         ]);
     }
 }

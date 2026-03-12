@@ -14,7 +14,7 @@
         "laravel/sanctum": "^4.3",
         "laravel/scout": "^10.24",
         "laravel/tinker": "^2.10.1",
-        "resend/resend-laravel": "*"
+        "resend/resend-laravel": "^1.3"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",

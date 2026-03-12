@@ -144,6 +144,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
             </button>
+            <div class="text-center mt-4">
+                <a href="{{ route('register') }}" class="text-sm font-medium text-slate-600 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400 transition-colors">¿No tienes cuenta? Regístrate</a>
+            </div>
         </form>
 
         <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
